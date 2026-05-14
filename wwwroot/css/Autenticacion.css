@@ -1,0 +1,215 @@
+﻿* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    background-color: #f0f7f7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.container {
+    background-color: white;
+    width: 900px;
+    height: 550px;
+    display: flex;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    position: relative;
+}
+
+/* -------- IZQUIERDA -------- */
+
+.auth-section {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    z-index: 2;
+    position: relative;
+}
+
+.form-container {
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    z-index: 3;
+}
+
+h1 {
+    color: #2d6a6a;
+    margin-bottom: 10px;
+    font-size: 2.2rem;
+}
+
+.subtitle {
+    color: #777;
+    margin-bottom: 35px;
+    line-height: 1.5;
+}
+
+/* Métodos */
+
+.method-box {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 35px;
+}
+
+.method {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 14px 18px;
+    border-radius: 15px;
+    background: #f5fbfb;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: 0.3s;
+    color: #666;
+}
+
+    .method:hover {
+        background: #eefaf6;
+    }
+
+    .method.active {
+        border-color: #64c4ac;
+        background: #eefaf6;
+        color: #2d6a6a;
+    }
+
+    .method i {
+        font-size: 1.1rem;
+    }
+
+/* Código */
+
+.code-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+    .code-container input {
+        width: 42px;
+        height: 48px;
+        border: 1px solid #dfeeee;
+        border-radius: 12px;
+        text-align: center;
+        font-size: 1rem;
+        outline: none;
+        background: #f9fdfd;
+        transition: 0.3s;
+    }
+
+        .code-container input:focus {
+            border-color: #64c4ac;
+            box-shadow: 0 0 10px rgba(100, 196, 172, 0.2);
+        }
+
+.separator {
+    font-size: 1.5rem;
+    color: #999;
+}
+
+/* Remember */
+
+.remember-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 35px;
+    color: #666;
+    font-size: 0.95rem;
+}
+
+/* Botones */
+
+.buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.send-btn,
+.verify-btn {
+    border: none;
+    padding: 14px 28px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.send-btn {
+    background: #dff5ef;
+    color: #2d6a6a;
+}
+
+    .send-btn:hover {
+        background: #cceee4;
+    }
+
+.verify-btn {
+    background: #58b9a1;
+    color: white;
+}
+
+    .verify-btn:hover {
+        background: #469682;
+    }
+
+/* -------- DERECHA -------- */
+
+.image-section {
+    flex: 1.2;
+    position: relative;
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Círculo principal */
+
+.circle-bg {
+    position: absolute;
+    right: -40%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 500px;
+    height: 600px;
+    background: #64c4ac;
+    border-radius: 50%;
+    opacity: 0.45;
+    /* Efecto de capas circulares */
+    box-shadow: -40px 0 0 20px rgba(100, 196, 172, 0.4), -80px 0 0 40px rgba(100, 196, 172, 0.2);
+    z-index: 1;
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+
+    .image-section {
+        display: none;
+    }
+
+    .auth-section {
+        width: 100%;
+    }
+
+    .code-container {
+        flex-wrap: wrap;
+    }
+}

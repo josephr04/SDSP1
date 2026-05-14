@@ -1,0 +1,74 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autenticación</title>
+    <link rel="stylesheet" href="~/css/Autenticacion.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+    <body>
+        <div class="container">
+            <!-- LADO IZQUIERDO -->
+            <div class="auth-section">
+                <div class="form-container">
+                    <h1>Autenticación</h1>
+                    <p class="subtitle">
+                        Ingresa el código de verificación enviado a tu correo.
+                    </p>
+                <div class="method-box">
+                    <div class="method active" onclick="selectMethod(this)">
+                        <i class="fa-solid fa-envelope"></i>
+                        <span>Enviar código vía correo</span>
+                    </div>
+                    <div class="method" onclick="selectMethod(this)">
+                        <i class="fa-solid fa-phone"></i>
+                        <span>Enviar código vía teléfono</span>
+                    </div>
+                </div>
+                    <div class="code-container">
+                        <input type="text" maxlength="1">
+                        <input type="text" maxlength="1">
+                        <input type="text" maxlength="1">
+                        <input type="text" maxlength="1">
+                        <span class="separator">-</span>
+                        <input type="text" maxlength="1">
+                        <input type="text" maxlength="1">
+                        <input type="text" maxlength="1">
+                        <input type="text" maxlength="1">
+                    </div>
+                    <div class="remember-box">
+                        <input type="checkbox">
+                        <label>Recordarme durante 30 días</label>
+                    </div>
+                    <div class="buttons">
+                        <button class="send-btn">
+                            Enviar Código
+                        </button>
+                        <button class="verify-btn">
+                            Verificar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- LADO DERECHO -->
+            <div class="image-section">
+                <div class="circle-bg"></div>
+                <div class="circle-bg second"></div>
+            </div>
+        </div>
+
+        <script>
+            function selectMethod(element) {
+                document.querySelectorAll('.method')
+                    .forEach(method => {
+                        method.classList.remove('active');
+                    });
+              element.classList.add('active');
+            }
+        </script>
+    </body>
+</html>

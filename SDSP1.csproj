@@ -7,6 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Services\**" />
+    <Compile Remove="Views\Auth\**" />
+    <Content Remove="Services\**" />
+    <Content Remove="Views\Auth\**" />
+    <EmbeddedResource Remove="Services\**" />
+    <EmbeddedResource Remove="Views\Auth\**" />
+    <None Remove="Services\**" />
+    <None Remove="Views\Auth\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MySql.Data" Version="9.7.0" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
     <PackageReference Include="Dapper" Version="2.1.72" />
     <PackageReference Include="MySql.Data" Version="9.7.0" />

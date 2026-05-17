@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MySql.Data.MySqlClient;
+using SDSP1.Database;
 
 namespace SDSP1.Controllers
 {

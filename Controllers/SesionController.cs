@@ -7,7 +7,7 @@ namespace SDSP1.Controllers
         public IActionResult CerrarSesion()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Login", "Login");
+            return RedirectToAction("Index", "Login");
         }
     }
 }

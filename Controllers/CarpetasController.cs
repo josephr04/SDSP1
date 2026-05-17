@@ -1,161 +1,31 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MySql.Data.MySqlClient;
-using SDSP1.Database;
 using SDSP1.Models;
+using SDSP1.Services;
 
 namespace SDSP1.Controllers
 {
+    [SesionActiva]
     public class CarpetasController : Controller
     {
-        public IActionResult Index()
+        private readonly CarpetasService _carpetasService;
+
+        public CarpetasController(CarpetasService carpetasService)
         {
-            List<Carpetas> lista =
-                new List<Carpetas>();
+            _carpetasService = carpetasService;
+        }
 
-            Conexion conexion =
-                new Conexion();
-
-            using (MySqlConnection conn =
-                   conexion.ObtenerConexion())
-            {
-                try
-                {
-                    conn.Open();
-
-                    /* BUSCAR ID DEL USUARIO */
-
-                    string sqlUsuario = @"
-                SELECT id_usuario
-                FROM usuarios
-                WHERE nombre = @nombreUsuario";
-
-                    MySqlCommand cmdUsuario =
-                        new MySqlCommand(
-                            sqlUsuario,
-                            conn
-                        );
-
-                    cmdUsuario.Parameters.AddWithValue(
-                        "@nombreUsuario",
-                        "prueba"
-                    );
-
-                    object resultado =
-                        cmdUsuario.ExecuteScalar();
-
-                    if (resultado != null)
-                    {
-                        int idUsuario =
-                            Convert.ToInt32(resultado);
-
-                        /* BUSCAR CARPETAS DEL USUARIO */
-
-                        string sql = @"
-                    SELECT nombre,
-                           f_creacion
-                    FROM carpetas
-                    WHERE id_usuario = @id_usuario";
-
-                        MySqlCommand cmd =
-                            new MySqlCommand(
-                                sql,
-                                conn
-                            );
-
-                        cmd.Parameters.AddWithValue(
-                            "@id_usuario",
-                            idUsuario
-                        );
-
-                        MySqlDataReader reader =
-                            cmd.ExecuteReader();
-
-                        while (reader.Read())
-                        {
-                            lista.Add(new Carpetas
-                            {
-                                nombre =
-                                    reader["nombre"]?.ToString(),
-
-                                f_creacion =
-                                    reader["f_creacion"]?.ToString()
-                            });
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    return Content(ex.Message);
-                }
-            }
-
+        public async Task<IActionResult> Index()
+        {
+            int idUsuario = Convert.ToInt32(HttpContext.Session.GetString("id_usuario"));
+            var lista = await _carpetasService.ObtenerCarpetas(idUsuario);
             return View("Carpetas", lista);
         }
+
         [HttpPost]
-        public IActionResult CrearCarpeta(string nombre)
+        public async Task<IActionResult> CrearCarpeta(string nombre)
         {
-            Conexion conexion = new Conexion();
-
-            using (MySqlConnection conn =
-                   conexion.ObtenerConexion())
-            {
-                conn.Open();
-
-                /* BUSCAR ID DEL USUARIO */
-
-                string sqlUsuario = @"
-            SELECT id_usuario
-            FROM usuarios
-            WHERE nombre = @nombreUsuario";
-
-                MySqlCommand cmdUsuario =
-                    new MySqlCommand(sqlUsuario, conn);
-
-                cmdUsuario.Parameters.AddWithValue(
-                    "@nombreUsuario",
-                    "prueba"
-                );
-
-                object resultado =
-                    cmdUsuario.ExecuteScalar();
-
-                if (resultado != null)
-                {
-                    int idUsuario =
-                        Convert.ToInt32(resultado);
-
-                    /* INSERTAR CARPETA */
-
-                    string sql = @"
-                INSERT INTO carpetas
-                (
-                    id_usuario,
-                    nombre,
-                    f_creacion
-                )
-                VALUES
-                (
-                    @id_usuario,
-                    @nombre,
-                    NOW()
-                )";
-
-                    MySqlCommand cmd =
-                        new MySqlCommand(sql, conn);
-
-                    cmd.Parameters.AddWithValue(
-                        "@id_usuario",
-                        idUsuario
-                    );
-
-                    cmd.Parameters.AddWithValue(
-                        "@nombre",
-                        nombre
-                    );
-
-                    cmd.ExecuteNonQuery();
-                }
-            }
+            int idUsuario = Convert.ToInt32(HttpContext.Session.GetString("id_usuario"));
+            await _carpetasService.CrearCarpeta(idUsuario, nombre);
             return RedirectToAction("Index");
         }
     }

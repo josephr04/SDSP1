@@ -14,9 +14,9 @@ namespace SDSP1.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Index()
         {
-            return View();
+            return View("Login");
         }
 
         [HttpPost]
@@ -27,22 +27,23 @@ namespace SDSP1.Controllers
 
             var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "desconocida";
 
-            var (exitoso, mensaje) = await _loginService.Login(model, ip);
+            var (exitoso, mensaje, idUsuario, nombre) = await _loginService.Login(model, ip);
 
             if (!exitoso)
             {
                 ModelState.AddModelError("", mensaje);
-                return View(model);
+                return View("Login", model);
             }
 
-            HttpContext.Session.SetString("correo_temp", model.correo);
-
             // En el 2FA exitoso
-            HttpContext.Session.SetString("correo", HttpContext.Session.GetString("correo_temp"));
             HttpContext.Session.SetString("autenticado", "true");
-            HttpContext.Session.Remove("correo_temp"); // limpiar el temporal
 
-            return RedirectToAction("Autenticacion", "Autenticacion");
+            HttpContext.Session.SetString("correo", model.correo);
+            HttpContext.Session.SetString("id_usuario", idUsuario.ToString());
+            HttpContext.Session.SetString("nombre", nombre);
+
+
+            return RedirectToAction("Index", "Autenticacion");
         }
     }
 }

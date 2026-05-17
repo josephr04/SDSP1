@@ -7,9 +7,9 @@ namespace SDSP1.Controllers
     public class AutenticacionController : Controller
     {
         [HttpGet]
-        public IActionResult Autenticacion()
+        public IActionResult Index()
         {
-            return View();
+            return View("Autenticacion");
         }
 
         [HttpPost]

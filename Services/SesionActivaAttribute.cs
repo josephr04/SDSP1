@@ -11,7 +11,7 @@ namespace SDSP1.Services
 
             if (sesion == null || sesion != "true")
             {
-                context.Result = new RedirectToActionResult("Login", "Login", null);
+                context.Result = new RedirectToActionResult("Index", "Login", null);
             }
 
             base.OnActionExecuting(context);

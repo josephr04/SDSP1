@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using SDSP1.Models;
+using SDSP1.Services;
 using System.Diagnostics;
 
 namespace SDSP1.Controllers
 {
+    [SesionActiva]
     public class HomeController : Controller
     {
         public IActionResult Index()

@@ -1,22 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MySql.Data.MySqlClient;
-using Proyecto1_Seguridad.Database;
 
-namespace Proyecto1_Seguridad.Controllers
+namespace SDSP1.Controllers
 {
     public class AutenticacionController : Controller
     {
-        public IActionResult Index()
+        [HttpGet]
+        public IActionResult Autenticacion()
         {
-            Conexion conexion = new Conexion();
+            return View();
+        }
 
-            using (MySqlConnection conn =
-                   conexion.ObtenerConexion())
-            {
-                conn.Open();
-            }
-
-            return View("Autenticacion");
+        [HttpPost]
+        public IActionResult Autenticacion(string codigo)
+        {
+            // aquí va la lógica de verificar el código 2FA
+            return View();
         }
     }
 }

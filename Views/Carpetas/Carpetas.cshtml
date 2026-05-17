@@ -37,8 +37,13 @@
                     <i class="fa-solid fa-user"></i>
                 </div>
                 <span class="user-name">
-                    prueba
+                    @Context.Session.GetString("nombre")
                 </span>
+                <form asp-controller="Sesion" asp-action="CerrarSesion" method="post" style="margin:0;">
+                    <button type="submit" class="logout-btn">
+                        <i class="fa-solid fa-right-from-bracket" title="Cerrar sesión"></i>
+                    </button>
+                </form>
             </div>
         </aside>
         <!-- CONTENIDO -->

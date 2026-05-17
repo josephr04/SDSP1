@@ -1,4 +1,5 @@
-﻿@{
+﻿@model SDSP1.Models.RegistrarViewModel
+@{
     Layout = null;
 }
 <!DOCTYPE html>
@@ -8,48 +9,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrarse</title>
     <link rel="stylesheet" href="~/css/Registrarse.css" />
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <div class="login-section">
             <div class="form-container">
                 <div class="tabs">
-                    <span class="tab active">
-                        Registrarse
-                    </span>
+                    <span class="tab active">Registrarse</span>
                 </div>
-                <form>
-                    <div class="input-group">
-                        <i class="fa-solid fa-user"></i>
-                        <input type="text"
-                               placeholder="Nombre">
+
+                @if (ViewData.ModelState.ContainsKey("") && ViewData.ModelState[""].Errors.Any())
+                {
+                    <div class="error-general">@ViewData.ModelState[""].Errors[0].ErrorMessage</div>
+                }
+
+                <form asp-controller="Registrarse" asp-action="Registrarse" method="post">
+                    <div class="input-group input-group--column">
+                        <div class="input-row">
+                            <i class="fa-solid fa-user"></i>
+                            <input asp-for="nombre" placeholder="Nombre" />
+                        </div>
+                        <span asp-validation-for="nombre" class="error-campo"></span>
                     </div>
-                    <div class="input-group">
-                        <i class="fa-regular fa-envelope"></i>
-                        <input type="email"
-                               placeholder="Correo electrónico">
+
+                    <div class="input-group input-group--column">
+                        <div class="input-row">
+                            <i class="fa-regular fa-envelope"></i>
+                            <input asp-for="correo" placeholder="Correo electrónico" />
+                        </div>
+                        <span asp-validation-for="correo" class="error-campo"></span>
                     </div>
-                    <div class="input-group">
-                        <i class="fa-solid fa-lock"></i>
-                        <input type="password"
-                               placeholder="Contraseña">
+
+                    <div class="input-group input-group--column">
+                        <div class="input-row input-row--relative">
+                            <i class="fa-solid fa-lock"></i>
+                            <input asp-for="contraseña" id="inputContraseña" type="password" placeholder="Contraseña" value="@Model?.contraseña" />
+                            <span id="toggleContraseña">Mostrar</span>
+                        </div>
+                        <span asp-validation-for="contraseña" class="error-campo"></span>
                     </div>
-                    <div class="input-group">
-                        <i class="fa-solid fa-lock"></i>
-                        <input type="password"
-                               placeholder="Confirmar contraseña">
+
+                    <div class="input-group input-group--column">
+                        <div class="input-row input-row--relative">
+                            <i class="fa-solid fa-lock"></i>
+                            <input asp-for="confirmarContraseña" id="inputConfirmar" type="password" placeholder="Confirmar contraseña" value="@Model?.confirmarContraseña" />
+                            <span id="toggleConfirmar">Mostrar</span>
+                        </div>
+                        <span asp-validation-for="confirmarContraseña" class="error-campo"></span>
                     </div>
+
                     <div class="form-footer">
-                        <a href="/"
-                           class="forgot-link">
-                            ¿Ya tienes cuenta?
-                        </a>
-                        <button type="submit"
-                                class="login-btn">
-                            Crear cuenta
-                        </button>
+                        <a href="/Login/Index" class="forgot-link">¿Ya tienes cuenta?</a>
+                        <button type="submit" class="login-btn">Crear cuenta</button>
                     </div>
                 </form>
             </div>
@@ -58,5 +70,6 @@
             <div class="circle-bg"></div>
         </div>
     </div>
+    <script src="~/js/Registrarse.js"></script>
 </body>
 </html>

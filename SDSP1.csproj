@@ -1,28 +1,20 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Services\**" />
-    <Compile Remove="Views\Auth\**" />
-    <Content Remove="Services\**" />
-    <Content Remove="Views\Auth\**" />
-    <EmbeddedResource Remove="Services\**" />
-    <EmbeddedResource Remove="Views\Auth\**" />
-    <None Remove="Services\**" />
-    <None Remove="Views\Auth\**" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="MySql.Data" Version="9.7.0" />
+		<PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
+		<PackageReference Include="Dapper" Version="2.1.72" />
+		<PackageReference Include="MySqlConnector" Version="2.5.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="MySql.Data" Version="9.7.0" />
-    <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
-    <PackageReference Include="Dapper" Version="2.1.72" />
-    <PackageReference Include="MySql.Data" Version="9.7.0" />
-    <PackageReference Include="MySqlConnector" Version="2.5.0" />
-  </ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Views\Shared\" />
+	</ItemGroup>
 
 </Project>

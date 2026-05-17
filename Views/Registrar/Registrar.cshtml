@@ -1,0 +1,35 @@
+﻿@* Esto lo puse para pruebas, cambienlo *@
+@model SDSP1.Models.RegistrarViewModel
+
+<h2>Registro</h2>
+
+@if (TempData["Exito"] != null)
+{
+    <div style="color:green">@TempData["Exito"]</div>
+}
+
+<form asp-action="Registrar" asp-controller="Registrar" method="post">
+
+    <div>
+        <label>Nombre</label>
+        <input asp-for="nombre" />
+        <span asp-validation-for="nombre" style="color:#c0392b; font-size:13px;"></span>
+    </div>
+    <div>
+        <label>Correo</label>
+        <input asp-for="correo" />
+        <span asp-validation-for="correo" style="color:#c0392b; font-size:13px;"></span>
+    </div>
+    <div>
+        <label>Contraseña</label>
+        <input asp-for="contraseña" type="password" />
+        <span asp-validation-for="contraseña" style="color:#c0392b; font-size:13px;"></span>
+    </div>
+    <div>
+        <label>Confirmar Contraseña</label>
+        <input asp-for="confirmarContraseña" type="password" />
+        <span asp-validation-for="confirmarContraseña" style="color:#c0392b; font-size:13px;"></span>
+    </div>
+
+    <button type="submit">Registrarse</button>
+</form>

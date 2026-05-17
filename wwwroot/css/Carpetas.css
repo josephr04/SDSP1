@@ -101,9 +101,10 @@ body {
 .user-box {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
     border-top: 1px solid #edf5f5;
     padding-top: 25px;
+    justify-content: space-between; /* <-- empuja el botón al extremo */
 }
 
 .avatar {
@@ -120,6 +121,7 @@ body {
 .user-name {
     font-weight: 600;
     color: #2d6a6a;
+    flex: 1;
 }
 
 /* CONTENT */
@@ -303,6 +305,26 @@ body {
         font-weight: 600;
     }
 
+    .input-group input {
+        border: 1.5px solid #e3f0f0;
+        border-radius: 15px;
+        padding: 12px 18px;
+        font-size: 1rem;
+        outline: none;
+        transition: border 0.2s;
+        color: #246b6b;
+        background: #f9fdfd;
+    }
+
+        .input-group input:focus {
+            border-color: #64c4ac;
+            background: white;
+        }
+
+        .input-group input::placeholder {
+            color: #9bb0b0;
+        }
+
 .modal-footer {
     display: flex;
     justify-content: flex-end;
@@ -333,4 +355,33 @@ body {
 
     .save-btn:hover {
         background: #469682;
+    }
+
+.folder-card {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+    .folder-card.oculto {
+        opacity: 0;
+        transform: scale(0.95);
+        pointer-events: none;
+    }
+
+.logout-btn {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #edf5f5;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #577474;
+    transition: 0.3s;
+}
+
+    .logout-btn:hover {
+        background: #fdecea;
+        color: #e74c3c;
     }

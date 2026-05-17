@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
-using Proyecto1_Seguridad.Database;
+using SDSP1.Database;
 
-namespace Proyecto1_Seguridad.Controllers
+namespace SDSP1.Controllers
 {
     public class AutenticacionController : Controller
     {

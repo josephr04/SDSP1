@@ -1,0 +1,134 @@
+﻿@model List<SDSP1.Models.Carpetas>
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Carpetas</title>
+    <link rel="stylesheet"
+          href="~/css/Carpetas.css" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-cloud"></i>
+                <span>CloudDrive</span>
+            </div>
+            <button class="new-btn" id="openModal">
+                <i class="fa-solid fa-plus"></i>
+                Nuevo
+            </button>
+            <nav class="menu">
+                <div class="menu-item active">
+                    <i class="fa-solid fa-folder"></i>
+                    <span>Mis archivos</span>
+                </div>
+            </nav>
+            <div class="user-box">
+                <div class="avatar">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <span class="user-name">
+                    prueba
+                </span>
+            </div>
+        </aside>
+        <!-- CONTENIDO -->
+        <main class="content">
+            <div class="top-content">
+                <h1>Mis archivos</h1>
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text"
+                           placeholder="Buscar archivos o carpetas">
+                </div>
+            </div>
+            <!-- GRID -->
+            <div class="folders-grid">
+                @if (Model != null && Model.Count > 0)
+                {
+                    @foreach (var carpeta in Model)
+                  {
+                        <div class="folder-card">
+                            <div class="folder-icon">
+
+                                <i class="fa-solid fa-folder"></i>
+                            </div>
+                            <div class="folder-info">
+                                <h3>
+                                    @carpeta.nombre
+                                </h3>
+                                <small>
+                                    @Convert.ToDateTime(
+                                             carpeta.f_creacion
+                                             ).ToString("dd/MM/yyyy")
+                                </small>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="fa-solid fa-folder-open"></i>
+                        <h2>
+                            No hay carpetas
+                        </h2>
+                        <p>
+                            Crea tu primera carpeta
+                        </p>
+                    </div>
+                }
+            </div>
+        </main>
+    </div>
+    <!-- MODAL -->
+    <div class="modal-overlay"
+         id="modalOverlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2>Nueva carpeta</h2>
+                <button class="close-btn"
+                        id="closeModal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <!-- FORM -->
+            <form method="post"
+                  action="/Carpetas/CrearCarpeta">
+                <div class="modal-body">
+                    <div class="input-group">
+                        <label>
+                            Nombre
+                        </label>
+                        <input type="text"
+                               name="nombre"
+                               placeholder="Ingresa el nombre"
+                               required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="cancel-btn"
+                            id="cancelModal">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                            class="save-btn">
+                        Crear carpeta
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="~/js/Carpetas.js"></script>
+</body>
+</html>

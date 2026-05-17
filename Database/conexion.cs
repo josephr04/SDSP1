@@ -1,6 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
-
-namespace Proyecto1_Seguridad.Database
+namespace SDSP1.Database
 {
     public class Conexion
     {

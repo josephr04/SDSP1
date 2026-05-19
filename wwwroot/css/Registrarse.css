@@ -88,6 +88,10 @@ body {
     position: relative;
 }
 
+    .input-row--relative input {
+        padding-right: 70px !important;
+    }
+
 .input-group i {
     position: absolute;
     left: 15px;
@@ -224,3 +228,57 @@ body {
         padding: 40px 0;
     }
 }
+
+/* ── Medidor de fuerza ───────────────────────── */
+.medidor-fuerza {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+    height: 10px;
+    margin-left: 10px;
+}
+
+#barraFuerza {
+    display: flex;
+    gap: 5px;
+}
+
+.segmento {
+    width: 40px;
+    height: 4px;
+    border-radius: 3px;
+    background-color: #e0e0e0;
+    transition: background-color 0.3s ease;
+}
+
+    /* Estados de color */
+    .segmento.debil {
+        background-color: #e53935;
+    }
+
+    .segmento.media {
+        background-color: #f9a825;
+    }
+
+    .segmento.fuerte {
+        background-color: #43a047;
+    }
+
+.texto-fuerza {
+    font-size: 0.78rem;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+    .texto-fuerza.debil {
+        color: #e53935;
+    }
+
+    .texto-fuerza.media {
+        color: #f9a825;
+    }
+
+    .texto-fuerza.fuerte {
+        color: #43a047;
+    }

@@ -78,6 +78,10 @@ body {
     cursor: default;
 }
 
+#inputContraseña {
+    padding-right: 70px !important;
+}
+
     .input-group i {
         position: absolute;
         left: 15px;

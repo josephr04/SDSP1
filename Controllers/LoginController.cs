@@ -27,7 +27,7 @@ namespace SDSP1.Controllers
 
             var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "desconocida";
 
-            var (exitoso, mensaje, idUsuario, nombre) = await _loginService.Login(model, ip);
+            var (exitoso, mensaje, idUsuario, nombre, celular) = await _loginService.Login(model, ip);
 
             if (!exitoso)
             {
@@ -35,15 +35,18 @@ namespace SDSP1.Controllers
                 return View("Login", model);
             }
 
-            // En el 2FA exitoso
-            HttpContext.Session.SetString("autenticado", "true");
+            // Pasar datos al 2FA sin establecer sesión aún
+            // Guardamos los datos en TempData para recuperarlos después del 2FA
+            TempData["UsuarioId"] = idUsuario;
+            TempData["Celular"] = celular;
+            TempData["Correo"] = model.correo;
+            TempData["Nombre"] = nombre;
 
-            HttpContext.Session.SetString("correo", model.correo);
-            HttpContext.Session.SetString("id_usuario", idUsuario.ToString());
-            HttpContext.Session.SetString("nombre", nombre);
-
-
-            return RedirectToAction("Index", "Autenticacion");
+            return RedirectToAction("Index", "Autenticacion", new 
+            { 
+                usuarioId = idUsuario,
+                celular = celular 
+            });
         }
     }
 }

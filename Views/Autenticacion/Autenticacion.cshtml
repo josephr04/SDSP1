@@ -1,4 +1,6 @@
-﻿@{
+﻿@model SDSP1.Models.Verify2FAViewModel
+
+@{
     Layout = null;
 }
 <!DOCTYPE html>
@@ -6,69 +8,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Autenticación</title>
+    <title>Verificación 2FA - TOTP</title>
     <link rel="stylesheet" href="~/css/Autenticacion.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .code-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .code-input {
+            width: 50px;
+            height: 60px;
+            font-size: 24px;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .code-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+
+        .separator {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            color: #999;
+            margin: 0 5px;
+        }
+    </style>
 </head>
-    <body>
-        <div class="container">
-            <!-- LADO IZQUIERDO -->
-            <div class="auth-section">
-                <div class="form-container">
-                    <h1>Autenticación</h1>
-                    <p class="subtitle">
-                        Ingresa el código de verificación enviado a tu correo.
-                    </p>
-                <div class="method-box">
-                    <div class="method active" onclick="selectMethod(this)">
-                        <i class="fa-solid fa-envelope"></i>
-                        <span>Enviar código vía correo</span>
+<body>
+    <div class="container">
+        <!-- LADO IZQUIERDO -->
+        <div class="auth-section">
+            <div class="form-container">
+                <h1><i class="fas fa-shield-alt"></i> Verificación de Identidad</h1>
+                <p class="subtitle">
+                    Ingresa el código de 6 dígitos de tu autenticador
+                </p>
+
+                <form asp-action="Index" asp-controller="Autenticacion" method="post" id="authForm">
+                    <input type="hidden" asp-for="UsuarioId" />
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        @ViewBag.Mensaje
                     </div>
-                    <div class="method" onclick="selectMethod(this)">
-                        <i class="fa-solid fa-phone"></i>
-                        <span>Enviar código vía teléfono</span>
-                    </div>
-                </div>
+
+                    <!-- Mostrar errores generales -->
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger">
+                            @foreach (var modelState in ViewData.ModelState.Values)
+                            {
+                                @foreach (var error in modelState.Errors)
+                                {
+                                    <p>@error.ErrorMessage</p>
+                                }
+                            }
+                        </div>
+                    }
+
+                    <!-- Input para código TOTP (6 dígitos) -->
                     <div class="code-container">
-                        <input type="text" maxlength="1">
-                        <input type="text" maxlength="1">
-                        <input type="text" maxlength="1">
-                        <input type="text" maxlength="1">
+                        <input type="text" maxlength="1" class="code-input" inputmode="numeric">
+                        <input type="text" maxlength="1" class="code-input" inputmode="numeric">
+                        <input type="text" maxlength="1" class="code-input" inputmode="numeric">
                         <span class="separator">-</span>
-                        <input type="text" maxlength="1">
-                        <input type="text" maxlength="1">
-                        <input type="text" maxlength="1">
-                        <input type="text" maxlength="1">
+                        <input type="text" maxlength="1" class="code-input" inputmode="numeric">
+                        <input type="text" maxlength="1" class="code-input" inputmode="numeric">
+                        <input type="text" maxlength="1" class="code-input" inputmode="numeric">
                     </div>
-                    <div class="remember-box">
-                        <input type="checkbox">
-                        <label>Recordarme durante 30 días</label>
-                    </div>
+
                     <div class="buttons">
-                        <button class="send-btn">
-                            Enviar Código
-                        </button>
-                        <button class="verify-btn">
-                            Verificar
+                        <button type="submit" class="verify-btn" onclick="submitForm(event)">
+                            <i class="fas fa-check"></i> Verificar Código
                         </button>
                     </div>
+                </form>
+
+                <div style="margin-top: 20px; text-align: center;">
+                    <a href="@Url.Action("Index", "Login")" style="color: #999; font-size: 14px;">
+                        <i class="fas fa-arrow-left"></i> Volver al Login
+                    </a>
                 </div>
-            </div>
-            <!-- LADO DERECHO -->
-            <div class="image-section">
-                <div class="circle-bg"></div>
-                <div class="circle-bg second"></div>
             </div>
         </div>
+        <!-- LADO DERECHO -->
+        <div class="image-section">
+            <div class="circle-bg"></div>
+            <div class="circle-bg second"></div>
+        </div>
+    </div>
 
-        <script>
-            function selectMethod(element) {
-                document.querySelectorAll('.method')
-                    .forEach(method => {
-                        method.classList.remove('active');
-                    });
-              element.classList.add('active');
-            }
-        </script>
-    </body>
+    <script>
+        // Auto focus y validación de entrada numérica
+        const inputs = document.querySelectorAll('.code-input');
+
+        inputs.forEach((input, index) => {
+            // Solo permitir números
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+
+                // Auto-pasar al siguiente input
+                if (this.value.length === 1 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            });
+
+            // Manejar backspace para ir al anterior
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+
+            // Permitir navegación con flechas
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowRight' && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+                if (e.key === 'ArrowLeft' && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+        });
+
+        function submitForm(event) {
+            // Recolectar los 6 dígitos
+            let code = '';
+            inputs.forEach(input => {
+                code += input.value;
+            });
+
+            // Guardar en input oculto con nombre "Codigo"
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'Codigo';
+            hiddenInput.value = code;
+            document.getElementById('authForm').appendChild(hiddenInput);
+        }
+    </script>
+</body>
 </html>

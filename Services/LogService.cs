@@ -17,11 +17,18 @@ namespace SDSP1.Services
             using var conn = _db.ObtenerConexion();
             await conn.OpenAsync();
 
-            await conn.ExecuteAsync(
+            try
+            {
+                await conn.ExecuteAsync(
                 @"INSERT INTO logs (correo, evento, descripcion, ip, fecha) 
                   VALUES (@correo, @evento, @descripcion, @ip, NOW())",
                 new { correo, evento, descripcion, ip }
-            );
+                );
+            }
+            finally
+            {
+                await conn.CloseAsync(); // Asegurar cierre
+            }
         }
     }
 }

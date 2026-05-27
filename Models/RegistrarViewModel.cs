@@ -9,12 +9,12 @@ namespace SDSP1.Models
         [StringLength(50, MinimumLength = 3, ErrorMessage = "El nombre debe tener entre 3 y 50 caracteres")]
         [RegularExpression(@"^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$",
             ErrorMessage = "El nombre solo puede contener letras y espacios")]
-        public string nombre { get; set; }
+        public required string nombre { get; set; }
 
         [Required(ErrorMessage = "El correo es requerido")]
         [EmailAddress(ErrorMessage = "El correo no es válido")]
         [StringLength(100, ErrorMessage = "El correo no puede superar 100 caracteres")]
-        public string correo { get; set; }
+        public required string correo { get; set; }
 
         [Required(ErrorMessage = "La contraseña es requerida")]
         [StringLength(100, MinimumLength = 8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres")]
@@ -25,7 +25,7 @@ namespace SDSP1.Models
         [Required(ErrorMessage = "Confirma tu contraseña")]
         [Compare("contraseña", ErrorMessage = "Las contraseñas no coinciden")]
         [DataType(DataType.Password)]
-        public string confirmarContraseña { get; set; }
+        public required string confirmarContraseña { get; set; }
 
         // Segunda capa: bloquea patrones SQL en todos los campos
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -48,7 +48,7 @@ namespace SDSP1.Models
             {
                 foreach (var patron in patronesSql)
                 {
-                    if (campo.Value.IndexOf(patron, StringComparison.OrdinalIgnoreCase) >= 0)
+                    if (campo.Value.Contains(patron, StringComparison.OrdinalIgnoreCase))
                     {
                         yield return new ValidationResult(
                             "Se detectaron caracteres o palabras no permitidas en uno de los campos.",

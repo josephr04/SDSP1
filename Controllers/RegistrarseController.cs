@@ -25,7 +25,7 @@ namespace SDSP1.Controllers
             if (!ModelState.IsValid)
                 return View("Registrarse", model);
 
-            var (exitoso, mensaje) = await _registrarService.Registrar(model);
+            var (exitoso, mensaje, idUsuario) = await _registrarService.Registrar(model);
 
             if (!exitoso)
             {
@@ -33,8 +33,13 @@ namespace SDSP1.Controllers
                 return View("Registrarse", model);
             }
 
-            TempData["Exito"] = mensaje;
-            return RedirectToAction("Index", "Login");
+            // Guardar datos en TempData para setup 2FA
+            TempData["UsuarioId"] = idUsuario;
+            TempData["Correo"] = model.correo;
+            TempData["Nombre"] = model.nombre;
+
+            // Redirigir a setup 2FA (es obligatorio)
+            return RedirectToAction("Index", "TwoFactorSetup", new { usuarioId = idUsuario });
         }
     }
 }

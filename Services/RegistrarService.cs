@@ -14,7 +14,7 @@ namespace SDSP1.Services
             _db = db;
         }
 
-        public async Task<(bool Exitoso, string Mensaje)> Registrar(RegistrarViewModel model)
+        public async Task<(bool Exitoso, string Mensaje, int IdUsuario)> Registrar(RegistrarViewModel model)
         {
             using var conn = _db.ObtenerConexion();
             await conn.OpenAsync();
@@ -25,7 +25,7 @@ namespace SDSP1.Services
                 new { model.nombre }
             );
             if (existeUsuario > 0)
-                return (false, "El nombre de usuario ya está en uso.");
+                return (false, "El nombre de usuario ya está en uso.", 0);
 
             // Verificar correo duplicado
             var existeCorreo = await conn.ExecuteScalarAsync<int>(
@@ -33,17 +33,18 @@ namespace SDSP1.Services
                 new { model.correo }
             );
             if (existeCorreo > 0)
-                return (false, "El correo ya está registrado.");
+                return (false, "El correo ya está registrado.", 0);
 
             // Hashear contraseña y guardar
             var hash = BCrypt.Net.BCrypt.HashPassword(model.contraseña);
-            await conn.ExecuteAsync(
+            var idUsuario = await conn.ExecuteScalarAsync<int>(
                 @"INSERT INTO usuarios (nombre, correo, contraseña, intentosFallidos, bloqueado, fechaRegistro) 
-                VALUES (@nombre, @correo, @contraseña, 0, 0, NOW())",
+                VALUES (@nombre, @correo, @contraseña, 0, 0, NOW());
+                SELECT LAST_INSERT_ID();",
                 new { model.nombre, model.correo, contraseña = hash }
             );
 
-            return (true, "Usuario registrado exitosamente.");
+            return (true, "Usuario registrado exitosamente.", idUsuario);
         }
     }
 }

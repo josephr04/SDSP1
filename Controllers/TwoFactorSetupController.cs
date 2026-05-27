@@ -164,6 +164,13 @@ namespace SDSP1.Controllers
                 using var conn = _db.ObtenerConexion();
                 await conn.OpenAsync();
 
+                // Obtener correo y nombre del usuario
+                var usuario = await conn.QueryFirstOrDefaultAsync<dynamic>(
+                    "SELECT correo, nombre FROM usuarios WHERE id_usuario = @id",
+                    new { id = usuarioId }
+                );
+
+
                 await conn.ExecuteAsync(
                     @"UPDATE usuarios 
                       SET two_factor_secret = @secret, 
@@ -179,6 +186,13 @@ namespace SDSP1.Controllers
 
                 // Limpiar TempData
                 TempData.Remove(TempDataSecretKey);
+                TempData.Remove("SetupUsuarioId");
+
+                // Crear sesión automáticamente
+                HttpContext.Session.SetString("autenticado", "true");
+                HttpContext.Session.SetString("id_usuario", usuarioId.ToString());
+                HttpContext.Session.SetString("correo", (string)usuario.correo);
+                HttpContext.Session.SetString("nombre", (string)usuario.nombre);
 
                 ViewBag.Exitoso = true;
                 ViewBag.Mensaje = "¡2FA habilitado correctamente! Ahora deberás ingresar un código de 6 dígitos en cada login.";

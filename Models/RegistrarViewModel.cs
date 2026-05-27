@@ -19,9 +19,7 @@ namespace SDSP1.Models
         [Required(ErrorMessage = "La contraseña es requerida")]
         [StringLength(100, MinimumLength = 8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres")]
         [DataType(DataType.Password)]
-        [RegularExpression(
-            @"^(?!.*['""\;\-\-\/\*\\])(?=.*[A-Z])(?=.*[!@#$%^&*()\[\]{}_+=<>?,.:`~|]).{8,}$",
-            ErrorMessage = "La contraseña debe tener al menos una mayúscula y un carácter especial. No se permiten: ' \" ; - -- / * \\")]
+
         public string contraseña { get; set; }
 
         [Required(ErrorMessage = "Confirma tu contraseña")]

@@ -1,0 +1,276 @@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurar Autenticación de Dos Factores</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .setup-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 500px;
+            padding: 40px;
+        }
+
+        .setup-container h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .setup-container .subtitle {
+            color: #999;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .qr-section {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+        }
+
+        .qr-section img {
+            max-width: 100%;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .qr-instructions {
+            background: #e3f2fd;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .secret-code {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            user-select: all;
+        }
+
+        .code-input-section {
+            margin: 20px 0;
+        }
+
+        .code-input-section input {
+            font-size: 24px;
+            text-align: center;
+            letter-spacing: 10px;
+            font-family: 'Courier New', monospace;
+            height: 60px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .code-input-section input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-verify {
+            background: #667eea;
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            font-weight: bold;
+            border-radius: 8px;
+            width: 100%;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+
+        .btn-verify:hover {
+            background: #5568d3;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .alert-danger {
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .success-icon {
+            font-size: 60px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .manual-entry-note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .error-text {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        @if (ViewBag.Exitoso == true)
+        {
+            <!-- Éxito -->
+            <div class="success-message">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2 style="color: #28a745; margin-bottom: 15px;">¡2FA Habilitado!</h2>
+                <p style="color: #666; margin-bottom: 20px;">
+                    @ViewBag.Mensaje
+                </p>
+                <a href="@Url.Action("Index", "Carpetas")" class="btn btn-verify" style="background: #28a745;">
+                    <i class="fas fa-arrow-right"></i> Ir a Carpetas
+                </a>
+            </div>
+        }
+        else
+        {
+            <!-- Formulario de configuración -->
+            <h1><i class="fas fa-shield-alt"></i> Autenticación de Dos Factores</h1>
+            <p class="subtitle">Configura tu autenticador TOTP para mayor seguridad</p>
+
+            @if (ViewBag.QrCodeBase64 != null)
+            {
+                <div class="qr-instructions">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Pasos:</strong><br>
+                    1. Descarga Google Authenticator, Microsoft Authenticator o Authy en tu celular<br>
+                    2. Escanea el código QR a continuación<br>
+                    3. Ingresa el código de 6 dígitos que genera tu autenticador
+                </div>
+
+                <!-- Código QR -->
+                <div class="qr-section">
+                    <p style="margin-bottom: 15px; font-weight: bold;">Escanea este código QR:</p>
+                    <img src="data:image/png;base64,@ViewBag.QrCodeBase64" alt="Código QR TOTP" />
+                </div>
+
+                <!-- Opción manual -->
+                <div class="manual-entry-note">
+                    <strong>¿No puedes escanear?</strong><br>
+                    Ingresa este código manualmente en tu autenticador:<br>
+                    <code style="background: white; padding: 5px;">@ViewBag.SecretoManual</code>
+                </div>
+
+                <!-- Errores -->
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        @Html.ValidationSummary(true)
+                    </div>
+                }
+
+                <!-- Formulario de verificación -->
+                <form method="post" action="@Url.Action("Verify", "TwoFactorSetup")">
+                    <div class="code-input-section">
+                        <label for="codigoTotp" style="margin-bottom: 10px; display: block; font-weight: bold;">
+                            Ingresa el código de 6 dígitos:
+                        </label>
+                        <input 
+                            type="text" 
+                            id="codigoTotp" 
+                            name="codigoTotp" 
+                            placeholder="000000" 
+                            maxlength="6"
+                            inputmode="numeric"
+                            pattern="[0-9]{6}"
+                            autocomplete="off"
+                            @if (ViewData.ModelState.ContainsKey("codigoTotp") && 
+                                 ViewData.ModelState["codigoTotp"].Errors.Count > 0)
+                            {
+                                <text> style="border-color: #dc3545;" </text>
+                            }
+                        />
+                        @if (ViewData.ModelState.ContainsKey("codigoTotp") && 
+                             ViewData.ModelState["codigoTotp"].Errors.Count > 0)
+                        {
+                            <div class="error-text">
+                                @ViewData.ModelState["codigoTotp"].Errors[0].ErrorMessage
+                            </div>
+                        }
+                    </div>
+
+                    <button type="submit" class="btn btn-verify">
+                        <i class="fas fa-check"></i> Verificar Código
+                    </button>
+
+                    <a href="@Url.Action("Index", "Carpetas")" class="btn btn-secondary mt-3" style="width: 100%;">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </form>
+            }
+        }
+    </div>
+
+    <script>
+        // Auto-validación de entrada numérica
+        document.getElementById('codigoTotp')?.addEventListener('input', function(e) {
+            // Solo permitir números
+            this.value = this.value.replace(/[^0-9]/g, '');
+
+            // Auto-enviar cuando complete 6 dígitos
+            if (this.value.length === 6) {
+                // Opcional: descomentar para auto-submit
+                // this.form.submit();
+            }
+        });
+
+        // Prevenir que se pueda escribir más de 6 caracteres
+        document.getElementById('codigoTotp')?.addEventListener('keypress', function(e) {
+            if (this.value.length >= 6) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

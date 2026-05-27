@@ -25,12 +25,21 @@
                 }
 
                 <form asp-controller="Registrarse" asp-action="Registrarse" method="post">
+
                     <div class="input-group input-group--column">
                         <div class="input-row">
                             <i class="fa-solid fa-user"></i>
                             <input asp-for="nombre" placeholder="Nombre" />
                         </div>
                         <span asp-validation-for="nombre" class="error-campo"></span>
+                    </div>
+
+                    <div class="input-group input-group--column">
+                        <div class="input-row">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                            <input asp-for="celular" placeholder="XXXX-XXXX"/>
+                        </div>
+                        <span asp-validation-for="celular" class="error-campo"></span>
                     </div>
 
                     <div class="input-group input-group--column">

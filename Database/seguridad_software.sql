@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Servidor: localhost
--- Tiempo de generación: 14-05-2026 a las 03:34:20
+-- Servidor: 127.0.0.1
+-- Tiempo de generación: 27-05-2026 a las 04:47:44
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -38,15 +38,38 @@ CREATE TABLE `carpetas` (
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `logs`
+--
+
+CREATE TABLE `logs` (
+  `id` int(11) NOT NULL,
+  `correo` varchar(255) DEFAULT NULL,
+  `evento` varchar(50) DEFAULT NULL,
+  `descripcion` varchar(255) DEFAULT NULL,
+  `fecha` datetime DEFAULT current_timestamp(),
+  `ip` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `usuarios`
 --
 
 CREATE TABLE `usuarios` (
   `id_usuario` int(11) NOT NULL,
   `nombre` varchar(50) NOT NULL,
+  `celular` varchar(9) NOT NULL,
   `correo` varchar(100) NOT NULL,
   `contraseña` varchar(255) NOT NULL,
-  `auth` varchar(6) DEFAULT NULL
+  `auth` varchar(6) DEFAULT NULL,
+  `intentosFallidos` int(11) DEFAULT 0,
+  `bloqueado` int(11) DEFAULT 0,
+  `fechaRegistro` datetime DEFAULT current_timestamp(),
+  `fechaBloqueo` datetime DEFAULT NULL,
+  `two_factor_secret` varchar(255) DEFAULT NULL COMMENT 'Secreto TOTP cifrado (Base32)',
+  `two_factor_enabled` varchar(1) DEFAULT NULL COMMENT 'Si 2FA está habilitado',
+  `two_factor_verified_at` datetime DEFAULT NULL COMMENT 'Fecha de última verificación exitosa de 2FA'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -61,10 +84,19 @@ ALTER TABLE `carpetas`
   ADD KEY `fk_id_usuario` (`id_usuario`);
 
 --
+-- Indices de la tabla `logs`
+--
+ALTER TABLE `logs`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indices de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  ADD PRIMARY KEY (`id_usuario`);
+  ADD PRIMARY KEY (`id_usuario`),
+  ADD UNIQUE KEY `celular` (`celular`),
+  ADD KEY `idx_two_factor_enabled` (`two_factor_enabled`),
+  ADD KEY `idx_correo` (`correo`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -75,6 +107,12 @@ ALTER TABLE `usuarios`
 --
 ALTER TABLE `carpetas`
   MODIFY `id_carpeta` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `logs`
+--
+ALTER TABLE `logs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`

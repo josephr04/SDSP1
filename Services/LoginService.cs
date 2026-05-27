@@ -18,7 +18,7 @@ namespace SDSP1.Services
             _log = log;
         }
 
-        public async Task<(bool Exitoso, string Mensaje, int IdUsuario, string Nombre)> Login(LoginViewModel model, string ip)
+        public async Task<(bool Exitoso, string Mensaje, int IdUsuario, string Nombre, string Celular)> Login(LoginViewModel model, string ip)
         {
             using var conn = _db.ObtenerConexion();
             await conn.OpenAsync();
@@ -31,7 +31,7 @@ namespace SDSP1.Services
             if (usuario == null)
             {
                 await _log.Registrar(model.correo, "LOGIN_FALLIDO", "Correo no encontrado", ip);
-                return (false, "Usuario o contraseña incorrectos.", 0, "");
+                return (false, "Usuario o contraseña incorrectos.", 0, "", "");
             }
 
             bool recienDesbloqueado = false;
@@ -45,7 +45,7 @@ namespace SDSP1.Services
                 {
                     var minutosRestantes = (int)(desbloqueo - DateTime.Now).TotalMinutes + 1;
                     await _log.Registrar(model.correo, "CUENTA_BLOQUEADA", "Intento de acceso con cuenta bloqueada", ip);
-                    return (false, $"Cuenta bloqueada. Intenta de nuevo en {minutosRestantes} minuto(s).", 0, "");
+                    return (false, $"Cuenta bloqueada. Intenta de nuevo en {minutosRestantes} minuto(s).", 0, "", "");
                 }
 
                 await conn.ExecuteAsync(
@@ -68,7 +68,7 @@ namespace SDSP1.Services
                         new { intentos, model.correo }
                     );
                     await _log.Registrar(model.correo, "CUENTA_BLOQUEADA", "Cuenta bloqueada por exceso de intentos", ip);
-                    return (false, $"Demasiados intentos fallidos. Cuenta bloqueada por {MinutosBloqueo} minutos.", 0, "");
+                    return (false, $"Demasiados intentos fallidos. Cuenta bloqueada por {MinutosBloqueo} minutos.", 0, "", "");
                 }
 
                 await conn.ExecuteAsync(
@@ -78,7 +78,7 @@ namespace SDSP1.Services
 
                 int intentosRestantes = MaxIntentos - intentos;
                 await _log.Registrar(model.correo, "LOGIN_FALLIDO", $"Contraseña incorrecta, intentos restantes: {intentosRestantes}", ip);
-                return (false, $"Usuario o contraseña incorrectos.", 0, "");
+                return (false, $"Usuario o contraseña incorrectos.", 0, "", "");
             }
 
             await conn.ExecuteAsync(
@@ -87,7 +87,7 @@ namespace SDSP1.Services
             );
 
             await _log.Registrar(model.correo, "LOGIN_EXITOSO", "Acceso exitoso", ip);
-            return (true, "Login exitoso.", Convert.ToInt32(usuario.id_usuario), (string)usuario.nombre);
+            return (true, "Login exitoso.", Convert.ToInt32(usuario.id_usuario), (string)usuario.nombre, (string)usuario.celular);
         }
     }
 }

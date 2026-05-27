@@ -10,7 +10,10 @@ builder.Services.AddScoped<RegistrarService>();
 builder.Services.AddScoped<LoginService>();
 builder.Services.AddScoped<LogService>();
 builder.Services.AddScoped<CarpetasService>();
-
+builder.Services.AddScoped<EncryptionService>();
+builder.Services.AddScoped<TotpService>();
+builder.Services.AddDataProtection();
+builder.Services.AddMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(5);

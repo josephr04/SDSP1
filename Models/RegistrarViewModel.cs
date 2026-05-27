@@ -9,12 +9,18 @@ namespace SDSP1.Models
         [StringLength(50, MinimumLength = 3, ErrorMessage = "El nombre debe tener entre 3 y 50 caracteres")]
         [RegularExpression(@"^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$",
             ErrorMessage = "El nombre solo puede contener letras y espacios")]
-        public string nombre { get; set; }
+        public required string nombre { get; set; }
+
+        [Required(ErrorMessage = "El número de celular es requerido")]
+        [StringLength(8, MinimumLength = 8, ErrorMessage = "El número debe tener 8 caracteres")]
+        [RegularExpression(@"^\d{8}$", ErrorMessage = "Coloque un número de celular válido")]
+        [DataType(DataType.PhoneNumber)]
+        public required string celular { get; set; }
 
         [Required(ErrorMessage = "El correo es requerido")]
         [EmailAddress(ErrorMessage = "El correo no es válido")]
         [StringLength(100, ErrorMessage = "El correo no puede superar 100 caracteres")]
-        public string correo { get; set; }
+        public required string correo { get; set; }
 
         [Required(ErrorMessage = "La contraseña es requerida")]
         [StringLength(100, MinimumLength = 8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres")]
@@ -22,12 +28,12 @@ namespace SDSP1.Models
         [RegularExpression(
             @"^(?!.*['""\;\-\-\/\*\\])(?=.*[A-Z])(?=.*[!@#$%^&*()\[\]{}_+=<>?,.:`~|]).{8,}$",
             ErrorMessage = "La contraseña debe tener al menos una mayúscula y un carácter especial. No se permiten: ' \" ; - -- / * \\")]
-        public string contraseña { get; set; }
+        public required string contraseña { get; set; }
 
         [Required(ErrorMessage = "Confirma tu contraseña")]
         [Compare("contraseña", ErrorMessage = "Las contraseñas no coinciden")]
         [DataType(DataType.Password)]
-        public string confirmarContraseña { get; set; }
+        public required string confirmarContraseña { get; set; }
 
         // Segunda capa: bloquea patrones SQL en todos los campos
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -42,6 +48,7 @@ namespace SDSP1.Models
             var campos = new Dictionary<string, string>
             {
                 { nameof(nombre),   nombre   ?? "" },
+                { nameof(celular), celular ?? "" },
                 { nameof(correo),   correo   ?? "" },
                 { nameof(contraseña), contraseña ?? "" }
             };
@@ -50,7 +57,7 @@ namespace SDSP1.Models
             {
                 foreach (var patron in patronesSql)
                 {
-                    if (campo.Value.IndexOf(patron, StringComparison.OrdinalIgnoreCase) >= 0)
+                    if (campo.Value.Contains(patron, StringComparison.OrdinalIgnoreCase))
                     {
                         yield return new ValidationResult(
                             "Se detectaron caracteres o palabras no permitidas en uno de los campos.",

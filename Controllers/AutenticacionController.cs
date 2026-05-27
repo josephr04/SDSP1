@@ -30,13 +30,12 @@ namespace SDSP1.Controllers
         /// Se llama después de que LoginController verificó credenciales correctas
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> Index(int? usuarioId, string celular = "")
+        public async Task<IActionResult> Index(int? usuarioId)
         {
             // Guardar datos en TempData si vienen en query string
             if (usuarioId.HasValue)
             {
                 TempData["UsuarioId"] = usuarioId.Value;
-                TempData["Celular"] = celular;
             }
 
             // Validar que tenemos el ID del usuario
@@ -67,14 +66,12 @@ namespace SDSP1.Controllers
 
             // Mantener datos en TempData para POST
             TempData.Keep("UsuarioId");
-            TempData.Keep("Celular");
             TempData.Keep("Correo");
             TempData.Keep("Nombre");
 
             var model = new Verify2FAViewModel 
             { 
                 UsuarioId = idUsuario,
-                Celular = (string)TempData["Celular"] ?? "celular",
                 Codigo = ""
             };
 
@@ -148,7 +145,6 @@ namespace SDSP1.Controllers
             // ✅ Código TOTP válido - Establecer sesión y permitir acceso
             HttpContext.Session.SetString("autenticado", "true");
             HttpContext.Session.SetString("id_usuario", model.UsuarioId.ToString());
-            HttpContext.Session.SetString("celular", model.Celular ?? "");
 
             // Recuperar datos del TempData (guardados en LoginController)
             var correo = TempData["Correo"]?.ToString() ?? "";

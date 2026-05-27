@@ -27,14 +27,6 @@ namespace SDSP1.Services
             if (existeUsuario > 0)
                 return (false, "El nombre de usuario ya está en uso.");
 
-            // Verificar celular duplicado
-            var existeCelular = await conn.ExecuteScalarAsync<int>(
-                "SELECT COUNT(*) FROM usuarios WHERE celular = @celular",
-                new { model.celular }
-            );
-            if (existeCelular > 0)
-                return(false, "El número de celular ya está registrado.");
-
             // Verificar correo duplicado
             var existeCorreo = await conn.ExecuteScalarAsync<int>(
                 "SELECT COUNT(*) FROM usuarios WHERE correo = @correo",
@@ -46,9 +38,9 @@ namespace SDSP1.Services
             // Hashear contraseña y guardar
             var hash = BCrypt.Net.BCrypt.HashPassword(model.contraseña);
             await conn.ExecuteAsync(
-                @"INSERT INTO usuarios (nombre, celular, correo, contraseña, intentosFallidos, bloqueado, fechaRegistro) 
-                VALUES (@nombre, @celular, @correo, @contraseña, 0, 0, NOW())",
-                new { model.nombre, model.celular, model.correo, contraseña = hash }
+                @"INSERT INTO usuarios (nombre, correo, contraseña, intentosFallidos, bloqueado, fechaRegistro) 
+                VALUES (@nombre, @correo, @contraseña, 0, 0, NOW())",
+                new { model.nombre, model.correo, contraseña = hash }
             );
 
             return (true, "Usuario registrado exitosamente.");

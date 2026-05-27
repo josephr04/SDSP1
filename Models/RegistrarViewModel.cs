@@ -11,12 +11,6 @@ namespace SDSP1.Models
             ErrorMessage = "El nombre solo puede contener letras y espacios")]
         public required string nombre { get; set; }
 
-        [Required(ErrorMessage = "El número de celular es requerido")]
-        [StringLength(8, MinimumLength = 8, ErrorMessage = "El número debe tener 8 caracteres")]
-        [RegularExpression(@"^\d{8}$", ErrorMessage = "Coloque un número de celular válido")]
-        [DataType(DataType.PhoneNumber)]
-        public required string celular { get; set; }
-
         [Required(ErrorMessage = "El correo es requerido")]
         [EmailAddress(ErrorMessage = "El correo no es válido")]
         [StringLength(100, ErrorMessage = "El correo no puede superar 100 caracteres")]
@@ -26,8 +20,8 @@ namespace SDSP1.Models
         [StringLength(100, MinimumLength = 8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres")]
         [DataType(DataType.Password)]
         [RegularExpression(
-            @"^(?!.*['""\;\-\-\/\*\\])(?=.*[A-Z])(?=.*[!@#$%^&*()\[\]{}_+=<>?,.:`~|]).{8,}$",
-            ErrorMessage = "La contraseña debe tener al menos una mayúscula y un carácter especial. No se permiten: ' \" ; - -- / * \\")]
+            @"^(?=.*[A-Z])(?=.*[!@#$%^&*()\[\]{}_+=<>?,.:`~|]).{8,}$",
+            ErrorMessage = "La contraseña debe tener al menos una mayúscula y un carácter especial.")]
         public required string contraseña { get; set; }
 
         [Required(ErrorMessage = "Confirma tu contraseña")]
@@ -48,7 +42,6 @@ namespace SDSP1.Models
             var campos = new Dictionary<string, string>
             {
                 { nameof(nombre),   nombre   ?? "" },
-                { nameof(celular), celular ?? "" },
                 { nameof(correo),   correo   ?? "" },
                 { nameof(contraseña), contraseña ?? "" }
             };

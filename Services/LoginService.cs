@@ -18,7 +18,7 @@ namespace SDSP1.Services
             _log = log;
         }
 
-        public async Task<(bool Exitoso, string Mensaje, int IdUsuario, string Nombre, string Celular)> Login(LoginViewModel model, string ip)
+        public async Task<(bool Exitoso, string Mensaje, int IdUsuario, string Nombre, string Correo)> Login(LoginViewModel model, string ip)
         {
             using var conn = _db.ObtenerConexion();
             await conn.OpenAsync();
@@ -87,7 +87,7 @@ namespace SDSP1.Services
             );
 
             await _log.Registrar(model.correo, "LOGIN_EXITOSO", "Acceso exitoso", ip);
-            return (true, "Login exitoso.", Convert.ToInt32(usuario.id_usuario), (string)usuario.nombre, (string)usuario.celular);
+            return (true, "Login exitoso.", Convert.ToInt32(usuario.id_usuario), (string)usuario.nombre, (string)usuario.correo);
         }
     }
 }

@@ -1,15 +1,22 @@
-﻿using MySql.Data.MySqlClient;
+﻿using Npgsql;
 
 namespace SDSP1.Database
 {
     public class Conexion
     {
         private string connectionString =
-            "server=localhost;database=seguridad_software;user=root;password=;";
+            "Host=aws-1-us-east-2.pooler.supabase.com;" +
+            "Port=6543;" +
+            "Database=postgres;" +
+            "Username=postgres.qlccxqyxjjrkilsisiao;" +
+            "Password=seguridad_software;" +
+            "SSL Mode=Require;" +
+            "Trust Server Certificate=true;" +
+            "Pooling=true;";
 
-        public MySqlConnection ObtenerConexion()
+        public NpgsqlConnection ObtenerConexion()
         {
-            return new MySqlConnection(connectionString);
+            return new NpgsqlConnection(connectionString);
         }
     }
 }

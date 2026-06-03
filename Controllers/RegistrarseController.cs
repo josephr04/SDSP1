@@ -33,12 +33,15 @@ namespace SDSP1.Controllers
                 return View("Registrarse", model);
             }
 
-            // Guardar datos en TempData para setup 2FA
+            // Guardar datos en TempData y mantenerlos
             TempData["UsuarioId"] = idUsuario;
             TempData["Correo"] = model.correo;
             TempData["Nombre"] = model.nombre;
+            TempData.Keep("UsuarioId");
+            TempData.Keep("Correo");
+            TempData.Keep("Nombre");
 
-            // Redirigir a setup 2FA (es obligatorio)
+            // Redirigir a configuración 2FA
             return RedirectToAction("Index", "TwoFactorSetup", new { usuarioId = idUsuario });
         }
     }

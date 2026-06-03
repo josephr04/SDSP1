@@ -1,54 +1,55 @@
-using Microsoft.AspNetCore.DataProtection;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace SDSP1.Services
 {
-    /// <summary>
-    /// Servicio para cifrar y descifrar datos sensibles usando DPAPI de ASP.NET Core
-    /// Utiliza Entity Framework Data Protection para cifrado en reposo
-    /// </summary>
     public class EncryptionService
     {
-        private readonly IDataProtector _protector;
+        private readonly byte[] _key;
+        private readonly byte[] _iv;
 
-        public EncryptionService(IDataProtectionProvider provider)
+        public EncryptionService()
         {
-            // Crear un protector específico para secretos 2FA
-            _protector = provider.CreateProtector("SDSP1.Services.TwoFactorSecrets");
+            string secret = "SDSP1-default-key-32-characters!!";
+            using var sha = SHA256.Create();
+            _key = sha.ComputeHash(Encoding.UTF8.GetBytes(secret));
+            _iv = _key[..16];
         }
 
-        /// <summary>
-        /// Cifra un string (ej. secreto TOTP) para almacenamiento seguro en BD
-        /// </summary>
         public string Encrypt(string plainText)
         {
-            if (string.IsNullOrEmpty(plainText))
-                return null;
+            if (string.IsNullOrEmpty(plainText)) return null;
 
-            try
-            {
-                return _protector.Protect(plainText);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("Error al cifrar datos", ex);
-            }
+            using var aes = Aes.Create();
+            aes.Key = _key;
+            aes.IV = _iv;
+
+            var encryptor = aes.CreateEncryptor();
+            byte[] inputBytes = Encoding.UTF8.GetBytes(plainText);
+            byte[] encrypted = encryptor.TransformFinalBlock(inputBytes, 0, inputBytes.Length);
+
+            return Convert.ToBase64String(encrypted);
         }
 
-        /// <summary>
-        /// Descifra un string almacenado en BD para obtener el valor original
-        /// </summary>
         public string Decrypt(string cipherText)
         {
-            if (string.IsNullOrEmpty(cipherText))
-                return null;
+            if (string.IsNullOrEmpty(cipherText)) return null;
 
             try
             {
-                return _protector.Unprotect(cipherText);
+                using var aes = Aes.Create();
+                aes.Key = _key;
+                aes.IV = _iv;
+
+                var decryptor = aes.CreateDecryptor();
+                byte[] inputBytes = Convert.FromBase64String(cipherText);
+                byte[] decrypted = decryptor.TransformFinalBlock(inputBytes, 0, inputBytes.Length);
+
+                return Encoding.UTF8.GetString(decrypted);
             }
-            catch (Exception ex)
+            catch
             {
-                throw new InvalidOperationException("Error al descifrar datos", ex);
+                throw new InvalidOperationException("Error al descifrar datos");
             }
         }
     }

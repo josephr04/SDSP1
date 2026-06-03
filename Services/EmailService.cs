@@ -37,7 +37,7 @@ namespace SDSP1.Services
             };
 
             using var client = new SmtpClient();
-            await client.ConnectAsync("smtp.office365.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+            await client.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
             await client.AuthenticateAsync(_config["Email:From"], _config["Email:Password"]);
             await client.SendAsync(message);
             await client.DisconnectAsync(true);

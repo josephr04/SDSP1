@@ -35,12 +35,14 @@ namespace SDSP1.Services
             if (existeCorreo > 0)
                 return (false, "El correo ya está registrado.", 0);
 
-            // Hashear contraseña y guardar
+            // Hashear contraseña
             var hash = BCrypt.Net.BCrypt.HashPassword(model.contraseña);
-            var idUsuario = await conn.ExecuteScalarAsync<int>(
+
+            // Insertar y obtener ID en PostgreSQL (usando RETURNING en la misma consulta)
+            var idUsuario = await conn.QuerySingleAsync<int>(
                 @"INSERT INTO usuarios (nombre, correo, contraseña, intentosFallidos, bloqueado, fechaRegistro) 
-                VALUES (@nombre, @correo, @contraseña, 0, 0, NOW());
-                SELECT LAST_INSERT_ID();",
+                VALUES (@nombre, @correo, @contraseña, 0, 0, NOW())
+                RETURNING id_usuario;",
                 new { model.nombre, model.correo, contraseña = hash }
             );
 

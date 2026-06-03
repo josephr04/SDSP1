@@ -38,9 +38,9 @@ namespace SDSP1.Controllers
                 {
                     await _emailService.EnviarCodigoRecuperacion(model.correo, codigo);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "Error al enviar el correo. Intenta de nuevo.");
+                    ModelState.AddModelError("", $"Error: {ex.Message} | Inner: {ex.InnerException?.Message}");
                     return View(model);
                 }
             }

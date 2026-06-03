@@ -21,12 +21,15 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Login/Index");   
+    app.UseExceptionHandler("/Login/Index");
     app.UseHsts();
 }
 

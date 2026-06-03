@@ -15,6 +15,7 @@ builder.Services.AddScoped<CarpetasService>();
 builder.Services.AddScoped<EncryptionService>();
 builder.Services.AddScoped<TotpService>();
 builder.Services.AddScoped<RecuperacionService>();
+builder.Services.AddScoped<EmailService>();
 builder.Services.AddDataProtection();
 builder.Services.AddMemoryCache();
 builder.Services.AddSession(options =>

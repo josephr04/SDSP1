@@ -15,14 +15,13 @@ namespace SDSP1.Services
             _db = db;
         }
 
-        public async Task<List<Carpetas>> ObtenerCarpetas(int idUsuario)
+        // ✅ Sin filtro por usuario — devuelve todas las carpetas
+        public async Task<List<Carpetas>> ObtenerCarpetas()
         {
             using var conn = _db.ObtenerConexion();
-            await conn.OpenAsync();
 
             var resultado = await conn.QueryAsync<Carpetas>(
-                "SELECT nombre, f_modificacion AS f_creacion FROM carpetas WHERE id_usuario = @idUsuario",
-                new { idUsuario }
+                "SELECT id_carpeta, nombre, tipo, f_modificacion FROM carpetas ORDER BY f_modificacion DESC"
             );
 
             return resultado.ToList();
@@ -30,47 +29,58 @@ namespace SDSP1.Services
 
         public async Task CrearCarpeta(int idUsuario, string nombre)
         {
-            // Validación en el servicio (defensa en profundidad)
             if (string.IsNullOrWhiteSpace(nombre))
                 throw new ArgumentException("El nombre de la carpeta no puede estar vacío.");
 
             nombre = nombre.Trim();
 
             if (nombre.Length > NombreMaxLength)
-                throw new ArgumentException($"El nombre de la carpeta no puede exceder {NombreMaxLength} caracteres.");
+                throw new ArgumentException($"El nombre no puede exceder {NombreMaxLength} caracteres.");
 
-            // Validar caracteres prohibidos
             var caracteresProhibidos = new[] { '\\', '/', ':', '*', '?', '"', '<', '>', '|' };
             if (nombre.Any(c => caracteresProhibidos.Contains(c)))
                 throw new ArgumentException("El nombre contiene caracteres no permitidos.");
 
-            // Sanitizar
             nombre = SanitizarNombre(nombre);
 
             if (string.IsNullOrEmpty(nombre))
-                throw new ArgumentException("El nombre de la carpeta es inválido después de sanitización.");
+                throw new ArgumentException("El nombre es inválido después de sanitización.");
 
             using var conn = _db.ObtenerConexion();
-            await conn.OpenAsync();
 
+            // ✅ Incluye tipo con valor 'general' por defecto
             await conn.ExecuteAsync(
-                "INSERT INTO carpetas (id_usuario, nombre, f_modificacion) VALUES (@idUsuario, @nombre, NOW())",
+                @"INSERT INTO carpetas (id_usuario, nombre, tipo, f_modificacion) 
+                  VALUES (@idUsuario, @nombre, 'general', NOW())",
                 new { idUsuario, nombre }
             );
         }
 
-        /// <summary>
-        /// Sanitiza el nombre para evitar ataques XSS
-        /// </summary>
         private string SanitizarNombre(string nombre)
         {
             if (string.IsNullOrEmpty(nombre))
                 return "";
 
-            // Remover caracteres de control y caracteres especiales peligrosos
             nombre = Regex.Replace(nombre, @"[\x00-\x1F\x7F]", "");
-
             return nombre;
+        }
+
+        public async Task EliminarCarpeta(int idCarpeta, int idUsuario)
+        {
+            using var conn = _db.ObtenerConexion();
+
+            var carpeta = await conn.QueryFirstOrDefaultAsync<Carpetas>(
+                "SELECT id_carpeta FROM carpetas WHERE id_carpeta = @idCarpeta AND id_usuario = @idUsuario",
+                new { idCarpeta, idUsuario }
+            );
+
+            if (carpeta == null)
+                throw new ArgumentException("Carpeta no encontrada o no tienes permiso para eliminarla.");
+
+            await conn.ExecuteAsync(
+                "DELETE FROM carpetas WHERE id_carpeta = @idCarpeta AND id_usuario = @idUsuario",
+                new { idCarpeta, idUsuario }
+            );
         }
     }
 }

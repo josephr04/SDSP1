@@ -5,10 +5,6 @@ using Dapper;
 
 namespace SDSP1.Controllers
 {
-    /// <summary>
-    /// Controlador para configurar autenticación de dos factores (TOTP)
-    /// El usuario genera un secreto, escanea un código QR y verifica con su autenticador
-    /// </summary>
     public class TwoFactorSetupController : Controller
     {
         private readonly TotpService _totpService;
@@ -23,221 +19,183 @@ namespace SDSP1.Controllers
             _db = db;
         }
 
-        /// <summary>
-        /// GET: Mostrar pantalla de configuración de 2FA con código QR
-        /// Puede ser llamado durante login (sin sesión, con usuarioId en query) 
-        /// o desde un panel settings (con sesión)
-        /// </summary>
         [HttpGet]
         public async Task<IActionResult> Index(int? usuarioId = null)
         {
-            // Obtener ID del usuario desde sesión O desde query string
-            int? idUsuario = usuarioId;
-
-            if (idUsuario == null)
-            {
-                // Intentar obtener de sesión (si ya está logueado)
-                var usuarioIdStr = HttpContext.Session.GetString("id_usuario");
-                if (string.IsNullOrEmpty(usuarioIdStr) || !int.TryParse(usuarioIdStr, out int sessionId))
-                {
-                    return RedirectToAction("Index", "Login");
-                }
-                idUsuario = sessionId;
-            }
-
-            // Obtener datos del usuario
-            using var conn = _db.ObtenerConexion();
-            await conn.OpenAsync();
-
-            var usuario = await conn.QueryFirstOrDefaultAsync<dynamic>(
-                "SELECT correo, nombre FROM usuarios WHERE id_usuario = @id",
-                new { id = idUsuario }
-            );
-
-            if (usuario == null)
-            {
-                return RedirectToAction("Index", "Login");
-            }
-
-            // Generar nuevo secreto TOTP
-            string secretoBase32 = _totpService.GenerateSecret();
-
-            // Guardar en TempData para validar en POST
-            TempData[TempDataSecretKey] = secretoBase32;
-            TempData["SetupUsuarioId"] = idUsuario.Value;
-
-            // Generar URL otpauth:// para el código QR
-            string otpauthUrl = _totpService.GenerateQrCodeUrl(
-                (string)usuario.correo,
-                "SDSP1",
-                secretoBase32
-            );
-
-            // Generar imagen QR en Base64
-            string qrCodeBase64 = _totpService.GenerateQrCodeAsBase64(otpauthUrl);
-
-            ViewBag.QrCodeBase64 = qrCodeBase64;
-            ViewBag.SecretoManual = secretoBase32;
-            ViewBag.UsuarioEmail = usuario.correo;
-
-            return View("Setup2FA");
-        }
-
-        /// <summary>
-        /// POST: Verificar código TOTP y guardar secreto cifrado en BD
-        /// </summary>
-        [HttpPost]
-        public async Task<IActionResult> Verify(string codigoTotp)
-        {
-            // Obtener ID del usuario desde sesión O TempData
-            int? usuarioId = null;
-
-            // Primero intentar sesión (si ya está logueado)
-            var usuarioIdStr = HttpContext.Session.GetString("id_usuario");
-            if (!string.IsNullOrEmpty(usuarioIdStr) && int.TryParse(usuarioIdStr, out int sessionId))
-            {
-                usuarioId = sessionId;
-            }
-
-            // Si no, obtener de TempData (durante login)
-            if (usuarioId == null && TempData["SetupUsuarioId"] is int tempId)
-            {
-                usuarioId = tempId;
-                TempData.Keep("SetupUsuarioId");
-            }
-
-            if (usuarioId == null)
-            {
-                return RedirectToAction("Index", "Login");
-            }
-
-            // Obtener secreto de TempData
-            if (TempData[TempDataSecretKey] is not string secretoBase32)
-            {
-                ModelState.AddModelError("", "Sesión expirada. Por favor intenta de nuevo.");
-                return RedirectToAction("Index", new { usuarioId = usuarioId });
-            }
-
-            // Validar que el código sea de 6 dígitos
-            if (string.IsNullOrEmpty(codigoTotp) || codigoTotp.Length != 6 || !int.TryParse(codigoTotp, out _))
-            {
-                ModelState.AddModelError("codigoTotp", "El código debe ser de 6 dígitos.");
-
-                // Regenerar QR para reintentar
-                TempData[TempDataSecretKey] = secretoBase32;
-                TempData["SetupUsuarioId"] = usuarioId;
-                string otpauthUrl = _totpService.GenerateQrCodeUrl(
-                    HttpContext.Session.GetString("correo") ?? "usuario@example.com",
-                    "SDSP1",
-                    secretoBase32
-                );
-                ViewBag.QrCodeBase64 = _totpService.GenerateQrCodeAsBase64(otpauthUrl);
-                ViewBag.SecretoManual = secretoBase32;
-
-                return View("Setup2FA");
-            }
-
-            // Validar el código TOTP
-            if (!_totpService.ValidateCode(secretoBase32, codigoTotp))
-            {
-                ModelState.AddModelError("codigoTotp", "Código TOTP incorrecto. Verifica tu autenticador.");
-
-                // Regenerar QR para reintentar
-                TempData[TempDataSecretKey] = secretoBase32;
-                TempData["SetupUsuarioId"] = usuarioId;
-                string otpauthUrl = _totpService.GenerateQrCodeUrl(
-                    HttpContext.Session.GetString("correo") ?? "usuario@example.com",
-                    "SDSP1",
-                    secretoBase32
-                );
-                ViewBag.QrCodeBase64 = _totpService.GenerateQrCodeAsBase64(otpauthUrl);
-                ViewBag.SecretoManual = secretoBase32;
-
-                return View("Setup2FA");
-            }
-
-            // ✅ Código válido - Guardar secreto cifrado en BD
             try
             {
-                string secretoCifrado = _encryptionService.Encrypt(secretoBase32);
+                // 1. Intentar obtener ID desde parámetro URL
+                int? idUsuario = usuarioId;
+
+                // 2. Si no, intentar desde TempData (viene del registro)
+                if (idUsuario == null && TempData["UsuarioId"] != null)
+                {
+                    idUsuario = Convert.ToInt32(TempData["UsuarioId"]);
+                    TempData.Keep("UsuarioId");
+                    TempData.Keep("Correo");
+                    TempData.Keep("Nombre");
+                }
+
+                // 3. Si no, intentar desde sesión
+                if (idUsuario == null)
+                {
+                    var usuarioIdStr = HttpContext.Session.GetString("id_usuario");
+                    if (!string.IsNullOrEmpty(usuarioIdStr) && int.TryParse(usuarioIdStr, out int sessionId))
+                        idUsuario = sessionId;
+                }
+
+                // Si no hay ID, redirigir al login
+                if (idUsuario == null)
+                    return RedirectToAction("Index", "Login");
 
                 using var conn = _db.ObtenerConexion();
                 await conn.OpenAsync();
 
-                // Obtener correo y nombre del usuario
+                // ✅ FIX: Consultar si el usuario ya tiene 2FA configurado
+                var usuario = await conn.QueryFirstOrDefaultAsync<dynamic>(
+                    "SELECT correo, nombre, two_factor_enabled, two_factor_secret FROM usuarios WHERE id_usuario = @id",
+                    new { id = idUsuario }
+                );
+
+                if (usuario == null)
+                    return RedirectToAction("Index", "Login");
+
+                // ✅ FIX: Si ya tiene 2FA, redirigir a verificar — NO generar nuevo QR
+                bool tieneSecret = !string.IsNullOrEmpty((string?)usuario.two_factor_secret);
+                bool twoFaHabilitado = usuario.two_factor_enabled?.ToString() == "True" || usuario.two_factor_enabled?.ToString() == "1";
+
+                if (twoFaHabilitado && tieneSecret)
+                {
+                    TempData["UsuarioId"] = idUsuario.Value;
+                    TempData["Correo"] = (string)usuario.correo;
+                    TempData["Nombre"] = (string)usuario.nombre;
+                    return RedirectToAction("Index", "Autenticacion", new { usuarioId = idUsuario });
+                }
+
+                // A partir de aquí solo llegan usuarios SIN 2FA — primera configuración
+                string email = TempData["Correo"] as string ?? (string)usuario.correo;
+                string nombre = TempData["Nombre"] as string ?? (string)usuario.nombre;
+
+                // Generar nuevo secreto TOTP
+                string secretoBase32 = _totpService.GenerateSecret();
+
+                // Guardar en TempData para validar en POST
+                TempData[TempDataSecretKey] = secretoBase32;
+                TempData["SetupUsuarioId"] = idUsuario.Value;
+
+                // Generar URL otpauth:// para el código QR
+                string otpauthUrl = _totpService.GenerateQrCodeUrl(email, "SDSP1", secretoBase32);
+
+                // Generar imagen QR en Base64
+                string qrCodeBase64 = _totpService.GenerateQrCodeAsBase64(otpauthUrl);
+
+                ViewBag.QrCodeBase64 = qrCodeBase64;
+                ViewBag.SecretoManual = secretoBase32;
+                ViewBag.UsuarioEmail = email;
+
+                if (TempData["ErrorTotp"] != null)
+                    ViewBag.ErrorTotp = TempData["ErrorTotp"];
+
+                return View("Setup2FA");
+            }
+            catch (Exception ex)
+            {
+                return Content($"Error al configurar 2FA: {ex.Message}");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Verify(string codigoTotp)
+        {
+            try
+            {
+                // Obtener ID del usuario
+                int? usuarioId = null;
+
+                // 1. Desde sesión
+                var usuarioIdStr = HttpContext.Session.GetString("id_usuario");
+                if (!string.IsNullOrEmpty(usuarioIdStr) && int.TryParse(usuarioIdStr, out int sessionId))
+                    usuarioId = sessionId;
+
+                // 2. Desde TempData
+                if (usuarioId == null && TempData["SetupUsuarioId"] != null)
+                {
+                    usuarioId = Convert.ToInt32(TempData["SetupUsuarioId"]);
+                    TempData.Keep("SetupUsuarioId");
+                }
+
+                if (usuarioId == null)
+                    return RedirectToAction("Index", "Login");
+
+                // Obtener secreto de TempData
+                if (TempData[TempDataSecretKey] is not string secretoBase32)
+                {
+                    ModelState.AddModelError("", "Sesión expirada. Por favor intenta de nuevo.");
+                    return RedirectToAction("Index", new { usuarioId = usuarioId });
+                }
+
+                // Validar el código
+                if (string.IsNullOrEmpty(codigoTotp) || codigoTotp.Length != 6 || !int.TryParse(codigoTotp, out _))
+                {
+                    ModelState.AddModelError("codigoTotp", "El código debe ser de 6 dígitos.");
+                    return RedirectToAction("Index", new { usuarioId = usuarioId });
+                }
+
+                if (!_totpService.ValidateCode(secretoBase32, codigoTotp))
+                {
+                    TempData["ErrorTotp"] = "Código incorrecto. Intenta con el código actual del autenticador.";
+                    TempData[TempDataSecretKey] = secretoBase32;  // re-guardar para que no expire
+                    TempData["SetupUsuarioId"] = usuarioId.Value; // re-guardar también
+                    return RedirectToAction("Index", new { usuarioId = usuarioId });
+                }
+
+                // Guardar secreto cifrado en BD
+                string secretoCifrado = _encryptionService.Encrypt(secretoBase32);
+                string correo = "";
+                string nombre = "";
+
+                using var conn = _db.ObtenerConexion();
+                await conn.OpenAsync();
+
                 var usuario = await conn.QueryFirstOrDefaultAsync<dynamic>(
                     "SELECT correo, nombre FROM usuarios WHERE id_usuario = @id",
                     new { id = usuarioId }
                 );
 
+                if (usuario != null)
+                {
+                    correo = usuario.correo;
+                    nombre = usuario.nombre;
+                }
 
                 await conn.ExecuteAsync(
                     @"UPDATE usuarios 
                       SET two_factor_secret = @secret, 
-                          two_factor_enabled = '1', 
+                          two_factor_enabled = true, 
                           two_factor_verified_at = NOW()
                       WHERE id_usuario = @id",
-                    new 
-                    { 
-                        secret = secretoCifrado,
-                        id = usuarioId
-                    }
+                    new { secret = secretoCifrado, id = usuarioId }
                 );
 
                 // Limpiar TempData
                 TempData.Remove(TempDataSecretKey);
                 TempData.Remove("SetupUsuarioId");
+                TempData.Remove("UsuarioId");
+                TempData.Remove("Correo");
+                TempData.Remove("Nombre");
 
-                // Crear sesión automáticamente
+                // Crear sesión
                 HttpContext.Session.SetString("autenticado", "true");
                 HttpContext.Session.SetString("id_usuario", usuarioId.ToString());
-                HttpContext.Session.SetString("correo", (string)usuario.correo);
-                HttpContext.Session.SetString("nombre", (string)usuario.nombre);
+                HttpContext.Session.SetString("correo", correo);
+                HttpContext.Session.SetString("nombre", nombre);
 
-                ViewBag.Exitoso = true;
-                ViewBag.Mensaje = "¡2FA habilitado correctamente! Ahora deberás ingresar un código de 6 dígitos en cada login.";
-
-                return View("Setup2FA");
+                return RedirectToAction("Index", "Carpetas");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", $"Error al guardar configuración: {ex.Message}");
+                ViewBag.Error = $"Error: {ex.Message}";
                 return View("Setup2FA");
-            }
-        }
-
-        /// <summary>
-        /// GET: Desactivar 2FA (opcional)
-        /// </summary>
-        [HttpPost]
-        public async Task<IActionResult> Disable()
-        {
-            var usuarioIdStr = HttpContext.Session.GetString("id_usuario");
-            if (string.IsNullOrEmpty(usuarioIdStr) || !int.TryParse(usuarioIdStr, out int usuarioId))
-            {
-                return Unauthorized();
-            }
-
-            try
-            {
-                using var conn = _db.ObtenerConexion();
-                await conn.OpenAsync();
-
-                await conn.ExecuteAsync(
-                    @"UPDATE usuarios 
-                      SET two_factor_secret = NULL, 
-                          two_factor_enabled = 0
-                      WHERE id_usuario = @id",
-                    new { id = usuarioId }
-                );
-
-                ViewBag.Mensaje = "2FA ha sido deshabilitado.";
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Error: {ex.Message}");
-                return RedirectToAction("Index");
             }
         }
     }

@@ -23,11 +23,12 @@ namespace SDSP1.Controllers
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
-                return View(model);
+                return View("Login", model);
 
             var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "desconocida";
 
-            var (exitoso, mensaje, idUsuario, nombre, celular) = await _loginService.Login(model, ip);
+            var (exitoso, mensaje, idUsuario, nombre, correo, twoFactorEnabled, twoFactorSecret) =
+                await _loginService.Login(model, ip);
 
             if (!exitoso)
             {
@@ -35,18 +36,18 @@ namespace SDSP1.Controllers
                 return View("Login", model);
             }
 
-            // Pasar datos al 2FA sin establecer sesión aún
-            // Guardamos los datos en TempData para recuperarlos después del 2FA
             TempData["UsuarioId"] = idUsuario;
-            TempData["Celular"] = celular;
-            TempData["Correo"] = model.correo;
+            TempData["Correo"] = correo;
             TempData["Nombre"] = nombre;
 
-            return RedirectToAction("Index", "Autenticacion", new 
-            { 
-                usuarioId = idUsuario,
-                celular = celular 
-            });
+            // ✅ Ya tiene 2FA configurado → ir a verificar código TOTP
+            if (twoFactorEnabled && !string.IsNullOrEmpty(twoFactorSecret))
+            {
+                return RedirectToAction("Index", "TwoFactorSetup", new { usuarioId = idUsuario });
+            }
+
+            // ✅ No tiene 2FA → ir a configurarlo por primera vez
+            return RedirectToAction("Index", "TwoFactorSetup", new { usuarioId = idUsuario });
         }
     }
 }

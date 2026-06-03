@@ -24,8 +24,7 @@
                     <div class="error-general">@ViewData.ModelState[""].Errors[0].ErrorMessage</div>
                 }
 
-                <form asp-controller="Registrarse" asp-action="Registrarse" method="post">
-
+                <form asp-controller="Registrarse" asp-action="Registrarse" method="post" id="registroForm">
                     <div class="input-group input-group--column">
                         <div class="input-row">
                             <i class="fa-solid fa-user"></i>
@@ -70,7 +69,7 @@
 
                     <div class="form-footer">
                         <a href="/Login/Index" class="forgot-link">¿Ya tienes cuenta?</a>
-                        <button type="submit" class="login-btn">Crear cuenta</button>
+                        <button type="submit" class="login-btn" id="btnRegistrar">Crear cuenta</button>
                     </div>
                 </form>
             </div>
@@ -79,9 +78,44 @@
             <div class="circle-bg"></div>
         </div>
     </div>
+    
     <script src="~/js/Registrarse.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@4.0.0/dist/jquery.validate.unobtrusive.min.js"></script>
+    
+    <script>
+        // Script para mostrar/ocultar contraseña (si no está en tu Registrarse.js)
+        document.getElementById('toggleContraseña')?.addEventListener('click', function() {
+            var input = document.getElementById('inputContraseña');
+            if (input.type === 'password') {
+                input.type = 'text';
+                this.textContent = 'Ocultar';
+            } else {
+                input.type = 'password';
+                this.textContent = 'Mostrar';
+            }
+        });
+
+        document.getElementById('toggleConfirmar')?.addEventListener('click', function() {
+            var input = document.getElementById('inputConfirmar');
+            if (input.type === 'password') {
+                input.type = 'text';
+                this.textContent = 'Ocultar';
+            } else {
+                input.type = 'password';
+                this.textContent = 'Mostrar';
+            }
+        });
+
+        // Script para el spinner al enviar el formulario
+        document.getElementById('registroForm')?.addEventListener('submit', function() {
+            var btn = document.getElementById('btnRegistrar');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...';
+            }
+        });
+    </script>
 </body>
 </html>

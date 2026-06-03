@@ -18,8 +18,8 @@ namespace SDSP1.Controllers
 
         public async Task<IActionResult> Index()
         {
-            int idUsuario = Convert.ToInt32(HttpContext.Session.GetString("id_usuario"));
-            var lista = await _carpetasService.ObtenerCarpetas(idUsuario);
+            // ✅ Carpetas globales — sin idUsuario
+            var lista = await _carpetasService.ObtenerCarpetas();
             return View("Carpetas", lista);
         }
 
@@ -28,7 +28,6 @@ namespace SDSP1.Controllers
         {
             int idUsuario = Convert.ToInt32(HttpContext.Session.GetString("id_usuario"));
 
-            // Validar entrada
             var validacion = ValidarNombreCarpeta(nombre);
             if (!validacion.Valido)
             {
@@ -36,16 +35,39 @@ namespace SDSP1.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Sanitizar el nombre
             string nombreSanitizado = SanitizarNombre(nombre);
 
-            await _carpetasService.CrearCarpeta(idUsuario, nombreSanitizado);
+            try
+            {
+                await _carpetasService.CrearCarpeta(idUsuario, nombreSanitizado);
+                TempData["SuccessMessage"] = "Carpeta creada exitosamente.";
+            }
+            catch (ArgumentException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+
             return RedirectToAction("Index");
         }
 
-        /// <summary>
-        /// Valida el nombre de la carpeta según reglas de negocio
-        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> EliminarCarpeta(int idCarpeta)
+        {
+            int idUsuario = Convert.ToInt32(HttpContext.Session.GetString("id_usuario"));
+
+            try
+            {
+                await _carpetasService.EliminarCarpeta(idCarpeta, idUsuario);
+                TempData["SuccessMessage"] = "Carpeta eliminada.";
+            }
+            catch (ArgumentException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+
+            return RedirectToAction("Index");
+        }
+
         private (bool Valido, string Mensaje) ValidarNombreCarpeta(string nombre)
         {
             if (string.IsNullOrWhiteSpace(nombre))
@@ -54,12 +76,8 @@ namespace SDSP1.Controllers
             nombre = nombre.Trim();
 
             if (nombre.Length > NombreMaxLength)
-                return (false, $"El nombre de la carpeta no puede exceder {NombreMaxLength} caracteres.");
+                return (false, $"El nombre no puede exceder {NombreMaxLength} caracteres.");
 
-            if (nombre.Length < 1)
-                return (false, "El nombre de la carpeta debe tener al menos 1 carácter.");
-
-            // Validar caracteres prohibidos
             var caracteresProhibidos = new[] { '\\', '/', ':', '*', '?', '"', '<', '>', '|' };
             if (nombre.Any(c => caracteresProhibidos.Contains(c)))
                 return (false, "El nombre contiene caracteres no permitidos: \\ / : * ? \" < > |");
@@ -67,20 +85,13 @@ namespace SDSP1.Controllers
             return (true, "");
         }
 
-        /// <summary>
-        /// Sanitiza el nombre de la carpeta para evitar ataques XSS
-        /// </summary>
         private string SanitizarNombre(string nombre)
         {
             if (string.IsNullOrEmpty(nombre))
                 return "";
 
-            // Remover espacios en blanco al inicio y final
             nombre = nombre.Trim();
-
-            // Remover caracteres de control y caracteres especiales peligrosos
             nombre = Regex.Replace(nombre, @"[\x00-\x1F\x7F]", "");
-
             return nombre;
         }
     }

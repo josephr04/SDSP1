@@ -446,11 +446,11 @@ body {
         font-size: 1.2rem;
     }
 
-        .logo i {
-            width: 40px;
-            height: 40px;
-            font-size: 1rem;
-        }
+    .logo i {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
 
     .new-btn {
         margin-top: 0;
@@ -484,9 +484,9 @@ body {
         overflow-x: hidden;
     }
 
-        .content::before {
-            display: none;
-        }
+    .content::before {
+        display: none;
+    }
 
     .top-content h1 {
         font-size: 1.6rem;

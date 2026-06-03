@@ -18,7 +18,6 @@ namespace SDSP1.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // ✅ Carpetas globales — sin idUsuario
             var lista = await _carpetasService.ObtenerCarpetas();
             return View("Carpetas", lista);
         }
@@ -51,13 +50,12 @@ namespace SDSP1.Controllers
         }
 
         [HttpPost]
+        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> EliminarCarpeta(int idCarpeta)
         {
-            int idUsuario = Convert.ToInt32(HttpContext.Session.GetString("id_usuario"));
-
             try
             {
-                await _carpetasService.EliminarCarpeta(idCarpeta, idUsuario);
+                await _carpetasService.EliminarCarpeta(idCarpeta);
                 TempData["SuccessMessage"] = "Carpeta eliminada.";
             }
             catch (ArgumentException ex)

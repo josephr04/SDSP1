@@ -15,7 +15,7 @@ namespace SDSP1.Services
             _db = db;
         }
 
-        // ✅ Sin filtro por usuario — devuelve todas las carpetas
+        // ✅ Filtrado por usuario
         public async Task<List<Carpetas>> ObtenerCarpetas()
         {
             using var conn = _db.ObtenerConexion();
@@ -48,11 +48,20 @@ namespace SDSP1.Services
 
             using var conn = _db.ObtenerConexion();
 
-            // ✅ Incluye tipo con valor 'general' por defecto
             await conn.ExecuteAsync(
                 @"INSERT INTO carpetas (id_usuario, nombre, tipo, f_modificacion) 
                   VALUES (@idUsuario, @nombre, 'general', NOW())",
                 new { idUsuario, nombre }
+            );
+        }
+
+        public async Task EliminarCarpeta(int idCarpeta)
+        {
+            using var conn = _db.ObtenerConexion();
+
+            await conn.ExecuteAsync(
+                "DELETE FROM carpetas WHERE id_carpeta = @idCarpeta",
+                new { idCarpeta }
             );
         }
 
@@ -63,24 +72,6 @@ namespace SDSP1.Services
 
             nombre = Regex.Replace(nombre, @"[\x00-\x1F\x7F]", "");
             return nombre;
-        }
-
-        public async Task EliminarCarpeta(int idCarpeta, int idUsuario)
-        {
-            using var conn = _db.ObtenerConexion();
-
-            var carpeta = await conn.QueryFirstOrDefaultAsync<Carpetas>(
-                "SELECT id_carpeta FROM carpetas WHERE id_carpeta = @idCarpeta AND id_usuario = @idUsuario",
-                new { idCarpeta, idUsuario }
-            );
-
-            if (carpeta == null)
-                throw new ArgumentException("Carpeta no encontrada o no tienes permiso para eliminarla.");
-
-            await conn.ExecuteAsync(
-                "DELETE FROM carpetas WHERE id_carpeta = @idCarpeta AND id_usuario = @idUsuario",
-                new { idCarpeta, idUsuario }
-            );
         }
     }
 }

@@ -85,29 +85,6 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@4.0.0/dist/jquery.validate.unobtrusive.min.js"></script>
     
     <script>
-        // Script para mostrar/ocultar contraseña (si no está en tu Registrarse.js)
-        document.getElementById('toggleContraseña')?.addEventListener('click', function() {
-            var input = document.getElementById('inputContraseña');
-            if (input.type === 'password') {
-                input.type = 'text';
-                this.textContent = 'Ocultar';
-            } else {
-                input.type = 'password';
-                this.textContent = 'Mostrar';
-            }
-        });
-
-        document.getElementById('toggleConfirmar')?.addEventListener('click', function() {
-            var input = document.getElementById('inputConfirmar');
-            if (input.type === 'password') {
-                input.type = 'text';
-                this.textContent = 'Ocultar';
-            } else {
-                input.type = 'password';
-                this.textContent = 'Mostrar';
-            }
-        });
-
         // Script para el spinner al enviar el formulario
         document.getElementById('registroForm')?.addEventListener('submit', function() {
             var btn = document.getElementById('btnRegistrar');

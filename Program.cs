@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.DataProtection;
 using SDSP1.Database;
 using SDSP1.Services;
 
@@ -12,8 +13,9 @@ builder.Services.AddScoped<LogService>();
 builder.Services.AddScoped<CarpetasService>();
 builder.Services.AddScoped<EncryptionService>();
 builder.Services.AddScoped<TotpService>();
-builder.Services.AddDataProtection();
-builder.Services.AddMemoryCache();
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/tmp/dataprotection-keys"))
+    .SetApplicationName("SDSP1"); builder.Services.AddMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(5);
@@ -21,7 +23,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 var app = builder.Build();

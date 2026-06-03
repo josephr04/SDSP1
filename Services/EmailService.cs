@@ -37,6 +37,7 @@ namespace SDSP1.Services
             };
 
             using var client = new SmtpClient();
+            client.AuthenticationMechanisms.Remove("GSSAPI");
             await client.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
             await client.AuthenticateAsync(_config["Email:From"], _config["Email:Password"]);
             await client.SendAsync(message);

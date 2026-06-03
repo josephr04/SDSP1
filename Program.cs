@@ -19,7 +19,7 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo("/tmp/dataprotection-keys"))
     .SetApplicationName("SDSP1"); builder.Services.AddMemoryCache();
 builder.Services.AddScoped<RecuperacionService>();
-builder.Services.AddScoped<EmailService>();
+builder.Services.AddHttpClient<EmailService>(); 
 builder.Services.AddDataProtection();
 builder.Services.AddMemoryCache();
 builder.Services.AddSession(options =>

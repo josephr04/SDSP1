@@ -1,30 +1,27 @@
-﻿using MailKit.Net.Smtp;
-using MimeKit;
+﻿using System.Text;
+using System.Text.Json;
 
 namespace SDSP1.Services
 {
     public class EmailService
     {
         private readonly IConfiguration _config;
+        private readonly HttpClient _http;
 
-        public EmailService(IConfiguration config)
+        public EmailService(IConfiguration config, HttpClient http)
         {
             _config = config;
+            _http = http;
         }
 
         public async Task EnviarCodigoRecuperacion(string destinatario, string codigo)
         {
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(
-                _config["Email:DisplayName"],
-                _config["Email:From"]
-            ));
-            message.To.Add(MailboxAddress.Parse(destinatario));
-            message.Subject = "Código de recuperación - CloudDrive";
-
-            message.Body = new TextPart("html")
+            var payload = new
             {
-                Text = $@"
+                from = $"{_config["Email:DisplayName"]} <noreply@josephrosas.dev>",
+                to = new[] { destinatario },
+                subject = "Código de recuperación - CloudDrive",
+                html = $@"
                 <div style='font-family: Segoe UI, sans-serif; max-width: 500px; margin: auto; padding: 30px; border-radius: 15px; border: 1px solid #edf5f5;'>
                     <h2 style='color: #246b6b;'>Recuperación de contraseña</h2>
                     <p style='color: #577474;'>Tu código de recuperación es:</p>
@@ -36,12 +33,19 @@ namespace SDSP1.Services
                 </div>"
             };
 
-            using var client = new SmtpClient();
-            client.AuthenticationMechanisms.Remove("GSSAPI");
-            await client.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-            await client.AuthenticateAsync(_config["Email:From"], _config["Email:Password"]);
-            await client.SendAsync(message);
-            await client.DisconnectAsync(true);
+            _http.DefaultRequestHeaders.Clear();
+            _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config["Email:ResendApiKey"]}");
+
+            var response = await _http.PostAsync(
+                "https://api.resend.com/emails",
+                new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json")
+            );
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Error al enviar correo: {error}");
+            }
         }
     }
 }

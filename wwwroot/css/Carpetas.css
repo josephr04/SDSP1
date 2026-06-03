@@ -415,3 +415,123 @@ body {
     background: #fee2e2 !important;
     color: #e74c3c !important;
 }
+
+/* ===== RESPONSIVE MÓVIL ===== */
+@media (max-width: 768px) {
+
+    body {
+        overflow: auto;
+    }
+
+    .container {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        border-radius: 0;
+    }
+
+    /* SIDEBAR horizontal arriba */
+    .sidebar {
+        width: 100%;
+        padding: 15px 20px;
+        flex-direction: row;
+        align-items: center;
+        border-right: none;
+        border-bottom: 1px solid #edf5f5;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .logo {
+        font-size: 1.2rem;
+    }
+
+        .logo i {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+
+    .new-btn {
+        margin-top: 0;
+        height: 45px;
+        padding: 0 20px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+    }
+
+    .menu {
+        margin-top: 0;
+        flex-direction: row;
+    }
+
+    .menu-item {
+        height: 40px;
+        padding: 0 15px;
+        font-size: 0.85rem;
+    }
+
+    .user-box {
+        border-top: none;
+        padding-top: 0;
+        margin-left: auto;
+    }
+
+    /* CONTENIDO */
+    .content {
+        padding: 20px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+        .content::before {
+            display: none;
+        }
+
+    .top-content h1 {
+        font-size: 1.6rem;
+        margin-bottom: 15px;
+    }
+
+    .search-box {
+        width: 100%;
+        height: 50px;
+    }
+
+    /* GRID de carpetas */
+    .folders-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 25px;
+    }
+
+    .folder-card {
+        padding: 20px 15px;
+        border-radius: 18px;
+    }
+
+    .folder-icon {
+        font-size: 2.8rem;
+        margin-bottom: 12px;
+    }
+
+    .folder-info h3 {
+        font-size: 0.9rem;
+    }
+
+    .folder-info small {
+        font-size: 0.75rem;
+    }
+
+    /* MODAL */
+    .modal-box {
+        width: 90%;
+        padding: 20px;
+        border-radius: 20px;
+    }
+
+    /* Botón eliminar siempre visible en móvil */
+    .delete-btn {
+        color: #aaa;
+    }
+}

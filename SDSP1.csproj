@@ -7,12 +7,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Include="Dockerfile" />
-	  <Compile Include="Procfile" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Content Include="Procfile" />
+		<None Remove="Dockerfile" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -27,7 +22,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Views\Shared\" />
+		<Folder Include="Views\Shared\" />
 	</ItemGroup>
 
 </Project>

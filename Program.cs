@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Identity;
+
 using SDSP1.Database;
 using SDSP1.Services;
 
@@ -12,6 +14,7 @@ builder.Services.AddScoped<LogService>();
 builder.Services.AddScoped<CarpetasService>();
 builder.Services.AddScoped<EncryptionService>();
 builder.Services.AddScoped<TotpService>();
+builder.Services.AddScoped<RecuperacionService>();
 builder.Services.AddDataProtection();
 builder.Services.AddMemoryCache();
 builder.Services.AddSession(options =>
@@ -42,3 +45,4 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 app.Run();
+

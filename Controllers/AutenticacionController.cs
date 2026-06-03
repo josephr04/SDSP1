@@ -12,18 +12,11 @@ namespace SDSP1.Controllers
     /// Controlador para validar 2FA TOTP en el login
     /// El usuario debe haber escanado el código QR previamente en /TwoFactorSetup
     /// </summary>
-    public class AutenticacionController : Controller
+    public class AutenticacionController(TotpService totpService, EncryptionService encryptionService, Conexion db) : Controller
     {
-        private readonly TotpService _totpService;
-        private readonly EncryptionService _encryptionService;
-        private readonly Conexion _db;
-
-        public AutenticacionController(TotpService totpService, EncryptionService encryptionService, Conexion db)
-        {
-            _totpService = totpService;
-            _encryptionService = encryptionService;
-            _db = db;
-        }
+        private readonly TotpService _totpService = totpService;
+        private readonly EncryptionService _encryptionService = encryptionService;
+        private readonly Conexion _db = db;
 
         /// <summary>
         /// GET: Mostrar pantalla de validación TOTP

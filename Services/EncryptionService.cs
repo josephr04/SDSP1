@@ -8,15 +8,12 @@ namespace SDSP1.Services
         private readonly byte[] _key;
         private readonly byte[] _iv;
 
-        public EncryptionService(IConfiguration configuration)
+        public EncryptionService()
         {
-            // Llave fija desde configuración — misma en todos los dispositivos
             string secret = "SDSP1-default-key-32-characters!!";
-
-            // Generar key e IV de 32 y 16 bytes desde el secret
             using var sha = SHA256.Create();
             _key = sha.ComputeHash(Encoding.UTF8.GetBytes(secret));
-            _iv = _key[..16]; // primeros 16 bytes como IV
+            _iv = _key[..16];
         }
 
         public string Encrypt(string plainText)

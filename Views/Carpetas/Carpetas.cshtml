@@ -63,19 +63,19 @@
                     @foreach (var carpeta in Model)
                   {
                         <div class="folder-card">
+                            <form method="post" action="/Carpetas/EliminarCarpeta"
+                                  onsubmit="return confirm('¿Eliminar la carpeta @carpeta.nombre?')">
+                                <input type="hidden" name="idCarpeta" value="@carpeta.id_carpeta" />
+                                <button type="submit" class="delete-btn" title="Eliminar">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
                             <div class="folder-icon">
-
                                 <i class="fa-solid fa-folder"></i>
                             </div>
                             <div class="folder-info">
-                                <h3>
-                                    @carpeta.nombre
-                                </h3>
-                                <small>
-                                    @Convert.ToDateTime(
-                                             carpeta.f_creacion
-                                             ).ToString("dd/MM/yyyy")
-                                </small>
+                                <h3>@carpeta.nombre</h3>
+                                <small>@carpeta.f_modificacion.ToString("dd/MM/yyyy")</small>
                             </div>
                         </div>
                     }

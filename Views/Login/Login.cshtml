@@ -47,10 +47,13 @@
                         <input asp-for="contraseña" id="inputContraseña" type="password" placeholder="Contraseña" />
                         <span id="toggleContraseña">Mostrar</span>
                     </div>
+                    <button type="submit" class="login-btn">Login</button>
 
                     <div class="form-footer">
+                        <a asp-controller="Account" asp-action="ForgotPassword" class="forgot-link">
+                            Olvidé la contraseña
+                        </a>
                         <a href="/Registrarse/Index" class="forgot-link">¿No tienes una cuenta? Regístrate</a>
-                        <button type="submit" class="login-btn">Login</button>
                     </div>
                 </form>
             </div>

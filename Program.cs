@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity;
+
 using SDSP1.Database;
 using SDSP1.Services;
 
@@ -12,6 +15,11 @@ builder.Services.AddScoped<LogService>();
 builder.Services.AddScoped<CarpetasService>();
 builder.Services.AddScoped<EncryptionService>();
 builder.Services.AddScoped<TotpService>();
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/tmp/dataprotection-keys"))
+    .SetApplicationName("SDSP1"); builder.Services.AddMemoryCache();
+builder.Services.AddScoped<RecuperacionService>();
+builder.Services.AddHttpClient<EmailService>(); 
 builder.Services.AddDataProtection();
 builder.Services.AddMemoryCache();
 builder.Services.AddSession(options =>
@@ -21,12 +29,18 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrEmpty(port))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Login/Index");   
+    app.UseExceptionHandler("/Login/Index");
     app.UseHsts();
 }
 
@@ -42,3 +56,4 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 app.Run();
+
